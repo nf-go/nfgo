@@ -18,6 +18,11 @@ const (
 
 // MustLoadConfig -
 func MustLoadConfig(confPath string) *Config {
+	return MustLoadConfigCustom(confPath, nil)
+}
+
+// MustLoadConfigCustom  -
+func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(config *Config) }) *Config {
 	if confPath == "" {
 		confPath = "app.yaml"
 	}
@@ -34,19 +39,27 @@ func MustLoadConfig(confPath string) *Config {
 	}
 
 	config := &Config{}
-	err = yaml.Unmarshal([]byte(data), config)
+	err = yaml.Unmarshal(data, config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	securityConfig := config.Security
 	if securityConfig != nil {
-
 		if securityConfig.TimeWindow == 0 {
 			securityConfig.TimeWindow = defaultTimeWindowMinite
 		}
 		if securityConfig.SignKeyLifeTime == 0 {
 			securityConfig.SignKeyLifeTime = defaultSignKeyLifeTime
+		}
+	}
+
+	// custom config
+	if customConfig != nil {
+		if err = yaml.Unmarshal(data, customConfig); err != nil {
+			log.Fatal(err)
+		} else {
+			customConfig.SetConfig(config)
 		}
 	}
 
