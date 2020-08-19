@@ -4,16 +4,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
 
 	yaml "gopkg.in/yaml.v2"
-)
-
-const (
-	// defaultTimeWindowMinite -
-	defaultTimeWindowMinite time.Duration = 30 * time.Minute
-	// defaultSignKeyLifeTime -
-	defaultSignKeyLifeTime time.Duration = 365 * 24 * time.Hour
 )
 
 // MustLoadConfig -
@@ -43,16 +35,10 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	securityConfig := config.Security
-	if securityConfig != nil {
-		if securityConfig.TimeWindow == 0 {
-			securityConfig.TimeWindow = defaultTimeWindowMinite
-		}
-		if securityConfig.SignKeyLifeTime == 0 {
-			securityConfig.SignKeyLifeTime = defaultSignKeyLifeTime
-		}
-	}
+	setDefaultValues(
+		config.Security,
+		config.Metrics,
+	)
 
 	// custom config
 	if customConfig != nil {
@@ -64,4 +50,15 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 	}
 
 	return config
+}
+
+func setDefaultValues(configs ...interface{ setDefaultValues() error }) error {
+	for _, config := range configs {
+		if config != nil {
+			if err := config.setDefaultValues(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

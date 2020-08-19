@@ -15,6 +15,7 @@ type Config struct {
 	Web      *WebConfig      `yaml:"web"`
 	RPC      *RPCConfig      `yaml:"rpc"`
 	Security *SecurityConfig `yaml:"security"`
+	Metrics  *MetricsConfig  `yaml:"metrics"`
 }
 
 // AppConfig -
@@ -123,4 +124,34 @@ type SecurityConfig struct {
 	Anons              []string      `yaml:"anons"`
 	Model              string        `yaml:"model"`
 	Policies           []string      `yaml:"policies"`
+}
+
+func (conf *SecurityConfig) setDefaultValues() error {
+	if conf.TimeWindow == 0 {
+		conf.TimeWindow = 30 * time.Minute
+	}
+	if conf.SignKeyLifeTime == 0 {
+		conf.SignKeyLifeTime = 365 * 24 * time.Hour
+	}
+	return nil
+}
+
+// MetricsConfig -
+type MetricsConfig struct {
+	Host        string `yaml:"host"`
+	Port        int32  `yaml:"port"`
+	MetricsPath string `yaml:"metricsPath"`
+}
+
+func (conf *MetricsConfig) setDefaultValues() error {
+	if conf.Host == "" {
+		conf.Host = "0.0.0.0"
+	}
+	if conf.Port == 0 {
+		conf.Port = 8079
+	}
+	if conf.MetricsPath == "" {
+		conf.MetricsPath = "/metrics"
+	}
+	return nil
 }
