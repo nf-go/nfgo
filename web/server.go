@@ -59,22 +59,9 @@ func NewServer(config *nconf.Config, middleware ...HandlerFunc) (Server, error) 
 		return nil, errors.New("web config is not initialized in the config")
 	}
 
-	host := webConfig.Host
-	if host == "" {
-		host = "0.0.0.0"
-	}
-	port := webConfig.Port
-	if port == 0 {
-		port = 8080
-	}
-
 	engine := gin.New()
 
-	maxMultipartMemory := webConfig.MaxMultipartMemory
-	if maxMultipartMemory == 0 {
-		maxMultipartMemory = 50 << 20 // 50MiB
-	}
-	engine.MaxMultipartMemory = maxMultipartMemory
+	engine.MaxMultipartMemory = webConfig.MaxMultipartMemory
 
 	if len(middleware) == 0 {
 		engine.Use(
@@ -92,8 +79,8 @@ func NewServer(config *nconf.Config, middleware ...HandlerFunc) (Server, error) 
 	s := &server{
 		engine: engine,
 		config: config,
-		host:   host,
-		port:   port,
+		host:   webConfig.Host,
+		port:   webConfig.Port,
 	}
 
 	// config swagger

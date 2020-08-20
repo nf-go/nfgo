@@ -29,7 +29,10 @@ func NewDB(dbConfig *nconf.DbConfig) (*gorm.DB, error) {
 		SkipDefaultTransaction: dbConfig.SkipDefaultTransaction,
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=Local", dbConfig.Username, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.Database)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=true&loc=Local",
+		dbConfig.Username, dbConfig.Password, dbConfig.Host,
+		dbConfig.Port, dbConfig.Database, dbConfig.Charset)
+
 	db, err := gorm.Open(mysql.Open(dsn), gormConfig)
 	if err != nil {
 		return nil, fmt.Errorf("fail to open db: %w", err)

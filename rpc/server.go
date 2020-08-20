@@ -29,15 +29,6 @@ func NewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor
 		return nil, errors.New("rpc config is not initialized in the config")
 	}
 
-	host := rpcConfig.Host
-	if host == "" {
-		host = "0.0.0.0"
-	}
-	port := rpcConfig.Port
-	if port == 0 {
-		port = 9090
-	}
-
 	var chainInterceptor grpc.UnaryServerInterceptor
 
 	if len(interceptors) == 0 {
@@ -50,21 +41,16 @@ func NewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor
 		chainInterceptor = interceptor.ChainUnaryServerInterceptor(interceptors...)
 	}
 
-	maxRecvMsgSize := int(rpcConfig.MaxRecvMsgSize)
-	if maxRecvMsgSize == 0 {
-		maxRecvMsgSize = 50 << 20 // 50MiB
-	}
-
 	opts := []grpc.ServerOption{
-		grpc.MaxRecvMsgSize(maxRecvMsgSize),
+		grpc.MaxRecvMsgSize(int(rpcConfig.MaxRecvMsgSize)),
 		grpc.UnaryInterceptor(chainInterceptor),
 	}
 
 	grpcServer := grpc.NewServer(opts...)
 	return &server{
 		Server: grpcServer,
-		host:   host,
-		port:   port}, nil
+		host:   rpcConfig.Host,
+		port:   rpcConfig.Port}, nil
 }
 
 type server struct {

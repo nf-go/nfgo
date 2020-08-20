@@ -5,12 +5,21 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"time"
 
 	"nfgo.ga/nfgo/nutil/id"
 )
 
 const letterBytes = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+// RedisKey -
+type RedisKey string
+
+// Key -
+func (k RedisKey) Key(a ...interface{}) string {
+	return fmt.Sprintf(string(k), a...)
+}
 
 // Sha256 -
 func Sha256(plain string) string {
@@ -37,10 +46,16 @@ func UUID() (string, error) {
 	return uuid.Hex(), err
 }
 
-// RedisKey -
-type RedisKey string
+// IsNil -
+func IsNil(i interface{}) bool {
+	v := reflect.ValueOf(i)
+	if v.Kind() == reflect.Ptr {
+		return v.IsNil()
+	}
+	return false
+}
 
-// Key -
-func (k RedisKey) Key(a ...interface{}) string {
-	return fmt.Sprintf(string(k), a...)
+// IsNotNil -
+func IsNotNil(i interface{}) bool {
+	return !IsNil(i)
 }

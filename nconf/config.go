@@ -95,6 +95,7 @@ type DbConfig struct {
 	Host                   string        `yaml:"host"`
 	Port                   int32         `yaml:"port"`
 	Database               string        `yaml:"database"`
+	Charset                string        `yaml:"charset"`
 	MaxIdle                int32         `yaml:"maxIdle"`
 	MaxOpen                int32         `yaml:"maxOpen"`
 	Name                   string        `yaml:"name"`
@@ -126,32 +127,9 @@ type SecurityConfig struct {
 	Policies           []string      `yaml:"policies"`
 }
 
-func (conf *SecurityConfig) setDefaultValues() error {
-	if conf.TimeWindow == 0 {
-		conf.TimeWindow = 30 * time.Minute
-	}
-	if conf.SignKeyLifeTime == 0 {
-		conf.SignKeyLifeTime = 365 * 24 * time.Hour
-	}
-	return nil
-}
-
 // MetricsConfig -
 type MetricsConfig struct {
 	Host        string `yaml:"host"`
 	Port        int32  `yaml:"port"`
 	MetricsPath string `yaml:"metricsPath"`
-}
-
-func (conf *MetricsConfig) setDefaultValues() error {
-	if conf.Host == "" {
-		conf.Host = "0.0.0.0"
-	}
-	if conf.Port == 0 {
-		conf.Port = 8079
-	}
-	if conf.MetricsPath == "" {
-		conf.MetricsPath = "/metrics"
-	}
-	return nil
 }

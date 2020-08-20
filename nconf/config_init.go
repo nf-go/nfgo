@@ -31,14 +31,12 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 	}
 
 	config := &Config{}
-	err = yaml.Unmarshal(data, config)
-	if err != nil {
+	if err = yaml.Unmarshal(data, config); err != nil {
 		log.Fatal(err)
 	}
-	setDefaultValues(
-		config.Security,
-		config.Metrics,
-	)
+	if err := config.setDefaultValues(); err != nil {
+		log.Fatal(err)
+	}
 
 	// custom config
 	if customConfig != nil {
@@ -50,15 +48,4 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 	}
 
 	return config
-}
-
-func setDefaultValues(configs ...interface{ setDefaultValues() error }) error {
-	for _, config := range configs {
-		if config != nil {
-			if err := config.setDefaultValues(); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
