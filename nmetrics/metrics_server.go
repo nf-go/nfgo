@@ -31,7 +31,7 @@ type Server interface {
 
 // ServerOption -
 type ServerOption struct {
-	GrpcServer rpc.Server
+	RPCServer rpc.Server
 }
 
 // NewServer -
@@ -74,9 +74,9 @@ func (s *server) registerCollectors(config *nconf.Config) error {
 func (s *server) Run(serverOption *ServerOption) error {
 
 	if serverOption != nil {
-		grpcServer := serverOption.GrpcServer.GRPCServer()
-		if grpcServer != nil {
-			grpc_prometheus.Register(grpcServer)
+		rpcServer := serverOption.RPCServer
+		if rpcServer != nil && rpcServer.GRPCServer() != nil {
+			grpc_prometheus.Register(rpcServer.GRPCServer())
 		}
 	}
 
