@@ -98,7 +98,6 @@ type DbConfig struct {
 	Charset                string        `yaml:"charset"`
 	MaxIdle                int32         `yaml:"maxIdle"`
 	MaxOpen                int32         `yaml:"maxOpen"`
-	Name                   string        `yaml:"name"`
 	SlowQueryThreshold     time.Duration `yaml:"slowQueryThreshold"`
 	SkipDefaultTransaction bool          `yaml:"skipDefaultTransaction"`
 	PrepareStmt            bool          `yaml:"prepareStmt"`

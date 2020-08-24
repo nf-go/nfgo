@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
+	"gorm.io/gorm"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/rpc"
@@ -32,6 +33,7 @@ type Server interface {
 // ServerOption -
 type ServerOption struct {
 	RPCServer rpc.Server
+	DB        *gorm.DB
 }
 
 // NewServer -
@@ -62,10 +64,14 @@ type server struct {
 	registry             *prometheus.Registry
 	grpcMetricsCollector *grpc_prometheus.ServerMetrics
 	webMetricsCollector  *webMetrics
+	dbMetricsCollector   *dbMetrics
 }
 
 func (s *server) registerCollectors(config *nconf.Config) error {
 	if err := s.registerRPCCollector(config); err != nil {
+		return err
+	}
+	if err := s.regitserDBCollector(config); err != nil {
 		return err
 	}
 	return s.regitserWebCollector(config)
@@ -77,6 +83,12 @@ func (s *server) Run(serverOption *ServerOption) error {
 		rpcServer := serverOption.RPCServer
 		if rpcServer != nil && rpcServer.GRPCServer() != nil {
 			grpc_prometheus.Register(rpcServer.GRPCServer())
+		}
+		db := serverOption.DB
+		if db != nil {
+			if err := db.Use(s.gormPrometheusPlugin()); err != nil {
+				return err
+			}
 		}
 	}
 

@@ -27,29 +27,29 @@ type webMetrics struct {
 }
 
 func newWebMetrics() *webMetrics {
-	labels := []string{"status_code", "path", "method"}
+	labelNames := []string{"status_code", "path", "method"}
 	return &webMetrics{
 		reqCountTotal: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: "http_request_count_total",
 				Help: "Total number of HTTP requests made.",
-			}, labels),
+			}, labelNames),
 		reqDurationSeconds: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
 				Name:    "http_request_duration_seconds",
 				Help:    "HTTP request latencies in seconds.",
 				Buckets: prometheus.DefBuckets,
-			}, labels),
+			}, labelNames),
 		reqSizeBytes: prometheus.NewSummaryVec(
 			prometheus.SummaryOpts{
 				Name: "http_request_size_bytes",
 				Help: "HTTP request sizes in bytes.",
-			}, labels),
+			}, labelNames),
 		respSizeBytes: prometheus.NewSummaryVec(
 			prometheus.SummaryOpts{
 				Name: "http_response_size_bytes",
 				Help: "HTTP request sizes in bytes.",
-			}, labels),
+			}, labelNames),
 	}
 }
 
