@@ -7,9 +7,12 @@ import (
 
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
+	"nfgo.ga/nfgo/nutil/ntypes"
 	"nfgo.ga/nfgo/rpc/interceptor"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 // Server -
@@ -47,6 +50,13 @@ func NewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor
 	}
 
 	grpcServer := grpc.NewServer(opts...)
+
+	if ntypes.BoolValue(rpcConfig.RegisterHealthServer) {
+		healthServer := health.NewServer()
+		healthServer.SetServingStatus("grpc.health.v1.Health", 1)
+		healthpb.RegisterHealthServer(grpcServer, healthServer)
+	}
+
 	return &server{
 		Server: grpcServer,
 		host:   rpcConfig.Host,

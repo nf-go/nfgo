@@ -83,9 +83,10 @@ type SwaggerConfig struct {
 
 // RPCConfig -
 type RPCConfig struct {
-	Host           string `yaml:"host"`
-	Port           int32  `yaml:"port"`
-	MaxRecvMsgSize int64  `yam:"maxRecvMsgSize"`
+	Host                 string `yaml:"host"`
+	Port                 int32  `yaml:"port"`
+	MaxRecvMsgSize       int64  `yaml:"maxRecvMsgSize"`
+	RegisterHealthServer *bool  `yaml:"registerHealthServer"`
 }
 
 // DbConfig -
@@ -99,8 +100,8 @@ type DbConfig struct {
 	MaxIdle                int32         `yaml:"maxIdle"`
 	MaxOpen                int32         `yaml:"maxOpen"`
 	SlowQueryThreshold     time.Duration `yaml:"slowQueryThreshold"`
-	SkipDefaultTransaction bool          `yaml:"skipDefaultTransaction"`
-	PrepareStmt            bool          `yaml:"prepareStmt"`
+	SkipDefaultTransaction *bool         `yaml:"skipDefaultTransaction"`
+	PrepareStmt            *bool         `yaml:"prepareStmt"`
 }
 
 // RedisConfig -

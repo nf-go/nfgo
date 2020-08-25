@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"nfgo.ga/nfgo/nutil"
+	"nfgo.ga/nfgo/nutil/ntypes"
 )
 
 func setDefaultValues(configs ...interface{ setDefaultValues() error }) error {
@@ -32,11 +33,11 @@ func (conf *DbConfig) setDefaultValues() error {
 	if conf.MaxOpen == 0 {
 		conf.MaxOpen = 2
 	}
-	if !conf.SkipDefaultTransaction {
-		conf.SkipDefaultTransaction = true
+	if conf.SkipDefaultTransaction == nil {
+		conf.SkipDefaultTransaction = ntypes.Bool(true)
 	}
-	if !conf.PrepareStmt {
-		conf.PrepareStmt = true
+	if conf.PrepareStmt == nil {
+		conf.PrepareStmt = ntypes.Bool(true)
 	}
 	if conf.Charset == "" {
 		conf.Charset = "utf8mb4"
@@ -79,6 +80,9 @@ func (conf *RPCConfig) setDefaultValues() error {
 	}
 	if conf.MaxRecvMsgSize == 0 {
 		conf.MaxRecvMsgSize = 50 << 20 // 50MiB
+	}
+	if conf.RegisterHealthServer == nil {
+		conf.RegisterHealthServer = ntypes.Bool(true)
 	}
 	return nil
 }

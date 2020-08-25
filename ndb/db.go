@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/nutil/ntypes"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -25,8 +26,8 @@ func NewDB(dbConfig *nconf.DbConfig) (*gorm.DB, error) {
 			SingularTable: true,
 		},
 		Logger:                 newLogger(dbConfig),
-		PrepareStmt:            dbConfig.PrepareStmt,
-		SkipDefaultTransaction: dbConfig.SkipDefaultTransaction,
+		PrepareStmt:            ntypes.BoolValue(dbConfig.PrepareStmt),
+		SkipDefaultTransaction: ntypes.BoolValue(dbConfig.SkipDefaultTransaction),
 	}
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=true&loc=Local",

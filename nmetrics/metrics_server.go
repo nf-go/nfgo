@@ -39,7 +39,7 @@ type ServerOption struct {
 // NewServer -
 func NewServer(config *nconf.Config) (Server, error) {
 	if config == nil {
-		return nil, errors.New("config is nill")
+		return nil, errors.New("config is nil")
 	}
 
 	metricsConfig := config.Metrics
