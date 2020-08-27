@@ -17,5 +17,5 @@ require (
 	google.golang.org/grpc v1.31.1
 	gopkg.in/yaml.v2 v2.3.0
 	gorm.io/driver/mysql v0.3.2
-	gorm.io/gorm v0.2.37
+	gorm.io/gorm v0.2.38
 )

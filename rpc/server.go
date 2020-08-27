@@ -37,12 +37,17 @@ func NewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor
 
 	if len(interceptors) == 0 {
 		chainInterceptor = interceptor.ChainUnaryServerInterceptor(
+			interceptor.RecoverUnaryServerInterceptor,
 			interceptor.MDCBindingUnaryServerInterceptor,
 			interceptor.ValidateUnaryServerInterceptor,
 			interceptor.LoggingUnaryServerInterceptor,
 			interceptor.ErrorHandleUnaryServerInterceptor)
 	} else {
-		chainInterceptor = interceptor.ChainUnaryServerInterceptor(interceptors...)
+		intercepts := []grpc.UnaryServerInterceptor{
+			interceptor.RecoverUnaryServerInterceptor,
+		}
+		intercepts = append(intercepts, interceptors...)
+		chainInterceptor = interceptor.ChainUnaryServerInterceptor(intercepts...)
 	}
 
 	opts := []grpc.ServerOption{
