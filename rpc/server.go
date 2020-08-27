@@ -18,6 +18,7 @@ import (
 // Server -
 type Server interface {
 	Run() error
+	MustRun()
 	GRPCServer() *grpc.Server
 }
 
@@ -63,6 +64,15 @@ func NewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor
 		port:   rpcConfig.Port}, nil
 }
 
+// MustNewServer -
+func MustNewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor) Server {
+	grpcServer, err := NewServer(config, interceptors...)
+	if err != nil {
+		nlog.Fatal("fail to init grpc server: ", err)
+	}
+	return grpcServer
+}
+
 type server struct {
 	*grpc.Server
 	host string
@@ -87,4 +97,10 @@ func (s *server) Run() error {
 	}
 
 	return nil
+}
+
+func (s *server) MustRun() {
+	if err := s.Run(); err != nil {
+		nlog.Fatal("fail to start grpc server: ", err)
+	}
 }

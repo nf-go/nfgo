@@ -21,6 +21,8 @@ import (
 type Server interface {
 	Run(serverOption *ServerOption) error
 
+	MustRun(serverOption *ServerOption)
+
 	RegisterCollectors(collectors ...prometheus.Collector) error
 
 	GrpcMetricsUnaryServerInterceptor() func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error)
@@ -57,6 +59,15 @@ func NewServer(config *nconf.Config) (Server, error) {
 	}
 
 	return s, nil
+}
+
+// MustNewServer -
+func MustNewServer(config *nconf.Config) Server {
+	server, err := NewServer(config)
+	if err != nil {
+		nlog.Fatal("fail to init promtheus metrics server: ", err)
+	}
+	return server
 }
 
 type server struct {
@@ -103,6 +114,12 @@ func (s *server) Run(serverOption *ServerOption) error {
 	}
 
 	return nil
+}
+
+func (s *server) MustRun(serverOption *ServerOption) {
+	if err := s.Run(serverOption); err != nil {
+		nlog.Fatal("fail to start promtheus metrics server: ", err)
+	}
 }
 
 func (s *server) RegisterCollectors(collectors ...prometheus.Collector) error {

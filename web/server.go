@@ -16,6 +16,7 @@ import (
 // Server -
 type Server interface {
 	Run() error
+	MustRun()
 	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
 }
 
@@ -34,6 +35,12 @@ func (s *server) Run() error {
 		nlog.Error("the web server is stoped  with error ", err)
 	}
 	return err
+}
+
+func (s *server) MustRun() {
+	if err := s.Run(); err != nil {
+		nlog.Fatal("fail to start http server:", err)
+	}
 }
 
 func (s *server) Group(relativePath string, handlers ...HandlerFunc) RouterGroup {
@@ -107,4 +114,13 @@ func NewServer(config *nconf.Config, middleware ...HandlerFunc) (Server, error) 
 	}
 
 	return s, nil
+}
+
+// MustNewServer -
+func MustNewServer(config *nconf.Config, middleware ...HandlerFunc) Server {
+	server, err := NewServer(config, middleware...)
+	if err != nil {
+		nlog.Fatal("fail to init http server: ", err)
+	}
+	return server
 }
