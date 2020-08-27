@@ -106,15 +106,32 @@ type DbConfig struct {
 
 // RedisConfig -
 type RedisConfig struct {
-	Password        string        `yaml:"password"`
-	Host            string        `yaml:"host"`
-	Port            int32         `yaml:"port"`
-	Database        uint8         `yaml:"database"`
-	IdleTimeout     time.Duration `yaml:"idleTimeout"`
-	MaxConnLifetime time.Duration `yaml:"maxConnLifetime"`
-	MaxIdle         int32         `yaml:"maxIdle"`
-	MaxActive       int32         `yaml:"maxActive"`
-	TestOnBorrow    bool          `yaml:"testOnBorrow"`
+	Password        string               `yaml:"password"`
+	Host            string               `yaml:"host"`
+	Port            int32                `yaml:"port"`
+	Database        uint8                `yaml:"database"`
+	IdleTimeout     time.Duration        `yaml:"idleTimeout"`
+	MaxConnLifetime time.Duration        `yaml:"maxConnLifetime"`
+	MaxIdle         int32                `yaml:"maxIdle"`
+	MaxActive       int32                `yaml:"maxActive"`
+	TestOnBorrow    bool                 `yaml:"testOnBorrow"`
+	Sentinel        *RedisSentinelConfig `yaml:"sentinel"`
+}
+
+// RedisSentinelConfig -
+type RedisSentinelConfig struct {
+	// Master - MasterName is a name of Redis master Sentinel servers monitor(Name of the Redis server).
+	Master string `yaml:"master"`
+	// Addrs - Addrs is a slice of with known Sentinel addresses (A list of "host:port" pairs).
+	Addrs []string `yaml:"addrs"`
+}
+
+// RedisClusterConfig -
+type RedisClusterConfig struct {
+	// Addrs - A list of "host:port" pairs to bootstrap from. This represents an "initial" list of cluster nodes and is required to have at least one entry.
+	Addrs []string `yaml:"addrs"`
+	// MaxRedirects -Maximum number of redirects to follow when executing commands across the cluster.
+	MaxRedirects int32 `yaml:"maxRedirects"`
 }
 
 // SecurityConfig -
