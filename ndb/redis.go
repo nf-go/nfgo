@@ -9,6 +9,7 @@ import (
 	"github.com/FZambia/sentinel"
 	"github.com/gomodule/redigo/redis"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/nlog"
 )
 
 func diaContextFunc(addr, pass string, database uint8) func(ctx context.Context) (redis.Conn, error) {
@@ -73,6 +74,15 @@ func NewRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 	return redisPool, nil
 }
 
+// MustNewRedisPool -
+func MustNewRedisPool(redisConfig *nconf.RedisConfig) *redis.Pool {
+	pool, err := NewRedisPool(redisConfig)
+	if err != nil {
+		nlog.Fatal("fail to new redis pool: ", err)
+	}
+	return pool
+}
+
 // NewSentinelRedisPool -
 func NewSentinelRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 	redisPool, err := newRedisPool(redisConfig)
@@ -112,4 +122,13 @@ func NewSentinelRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 	}
 
 	return redisPool, nil
+}
+
+// MustNewSentinelRedisPool -
+func MustNewSentinelRedisPool(redisConfig *nconf.RedisConfig) *redis.Pool {
+	pool, err := NewSentinelRedisPool(redisConfig)
+	if err != nil {
+		nlog.Fatal("fail to new redis pool: ", err)
+	}
+	return pool
 }

@@ -9,6 +9,7 @@ import (
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"gorm.io/gorm"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/nlog"
 )
 
 // NewEnforcer -
@@ -28,6 +29,15 @@ func NewEnforcer(securityConfig *nconf.SecurityConfig, db *gorm.DB) (casbin.IEnf
 		return nil, fmt.Errorf("fail to create enforcer: %w", err)
 	}
 	return enforcer, nil
+}
+
+// MustNewEnforcer -
+func MustNewEnforcer(securityConfig *nconf.SecurityConfig, db *gorm.DB) casbin.IEnforcer {
+	enforcer, err := NewEnforcer(securityConfig, db)
+	if err != nil {
+		nlog.Fatal("fail to create enforcer: ", err)
+	}
+	return enforcer
 }
 
 // InitPolicy -

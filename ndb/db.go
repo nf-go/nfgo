@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/ntypes"
 
 	"gorm.io/driver/mysql"
@@ -46,6 +47,15 @@ func NewDB(dbConfig *nconf.DbConfig) (*gorm.DB, error) {
 	sqlDB.SetMaxOpenConns(int(dbConfig.MaxOpen))
 
 	return db, nil
+}
+
+// MustNewDB -
+func MustNewDB(dbConfig *nconf.DbConfig) *gorm.DB {
+	db, err := NewDB(dbConfig)
+	if err != nil {
+		nlog.Fatal("fail to new db: ", err)
+	}
+	return db
 }
 
 // WithContext -
