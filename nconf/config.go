@@ -83,10 +83,19 @@ type SwaggerConfig struct {
 
 // RPCConfig -
 type RPCConfig struct {
-	Host                 string `yaml:"host"`
-	Port                 int32  `yaml:"port"`
-	MaxRecvMsgSize       int64  `yaml:"maxRecvMsgSize"`
-	RegisterHealthServer *bool  `yaml:"registerHealthServer"`
+	Host                 string                      `yaml:"host"`
+	Port                 int32                       `yaml:"port"`
+	MaxRecvMsgSize       int64                       `yaml:"maxRecvMsgSize"`
+	RegisterHealthServer *bool                       `yaml:"registerHealthServer"`
+	Clients              map[string]*RPCClientConfig `yaml:"clients"`
+}
+
+// RPCClientConfig -
+type RPCClientConfig struct {
+	Addr               string `yaml:"addr"`
+	Plaintext          *bool  `yaml:"plaintext"`
+	MaxCallSendMsgSize int    `yaml:"maxCallSendMsgSize"`
+	MaxCallRecvMsgSize int    `yaml:"maxCallRecvMsgSize"`
 }
 
 // DbConfig -

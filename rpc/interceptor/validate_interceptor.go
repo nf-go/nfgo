@@ -7,6 +7,16 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
+// ValidateUnaryClientInterceptor -
+func ValidateUnaryClientInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	if v, ok := req.(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return grpc.Errorf(codes.InvalidArgument, err.Error())
+		}
+	}
+	return invoker(ctx, method, req, reply, cc, opts...)
+}
+
 // ValidateUnaryServerInterceptor -
 func ValidateUnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	if v, ok := req.(interface{ Validate() error }); ok {

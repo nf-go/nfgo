@@ -11,6 +11,38 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+// MDCBindingUnaryClientInterceptor -
+func MDCBindingUnaryClientInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	mdc, err := ncontext.CurrentMDC(ctx)
+	if err != nil {
+		return err
+	}
+	kv := []string{
+		nconst.HeaderTraceID, mdc.TraceID(),
+		nconst.HeaderRealIP, mdc.ClientIP(),
+		nconst.HeaderClientType, mdc.ClientIP(),
+		nconst.HeaderSub, mdc.SubjectID(),
+	}
+	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
+	return invoker(ctx, method, req, reply, cc, opts...)
+}
+
+// MDCBindingStreamClientInterceptor -
+func MDCBindingStreamClientInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+	mdc, err := ncontext.CurrentMDC(ctx)
+	if err != nil {
+		return nil, err
+	}
+	kv := []string{
+		nconst.HeaderTraceID, mdc.TraceID(),
+		nconst.HeaderRealIP, mdc.ClientIP(),
+		nconst.HeaderClientType, mdc.ClientIP(),
+		nconst.HeaderSub, mdc.SubjectID(),
+	}
+	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
+	return streamer(ctx, desc, cc, method, opts...)
+}
+
 // MDCBindingUnaryServerInterceptor -
 func MDCBindingUnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	if ctx, err = bindMDCToContext(ctx, info.FullMethod); err != nil {

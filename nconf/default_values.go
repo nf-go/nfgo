@@ -84,6 +84,26 @@ func (conf *RPCConfig) setDefaultValues() error {
 	if conf.RegisterHealthServer == nil {
 		conf.RegisterHealthServer = ntypes.Bool(true)
 	}
+	for _, clientConf := range conf.Clients {
+		if clientConf != nil {
+			if err := clientConf.setDefaultValues(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (conf *RPCClientConfig) setDefaultValues() error {
+	if conf.MaxCallSendMsgSize == 0 {
+		conf.MaxCallSendMsgSize = 50 << 20 // 50MiB
+	}
+	if conf.MaxCallRecvMsgSize == 0 {
+		conf.MaxCallRecvMsgSize = 50 << 20 // 50MiB
+	}
+	if conf.Plaintext == nil {
+		conf.Plaintext = ntypes.Bool(true)
+	}
 	return nil
 }
 
