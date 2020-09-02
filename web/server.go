@@ -20,6 +20,26 @@ type Server interface {
 	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
 }
 
+// ServerOption -
+type ServerOption struct {
+	Middlewares []HandlerFunc
+}
+
+func (o *ServerOption) setMiddlewaresToEngine(engine *gin.Engine) {
+	if len(o.Middlewares) == 0 {
+		engine.Use(
+			gin.Recovery(),
+			BindMDC().WrapHandler(),
+			Logging().WrapHandler(),
+		)
+	} else {
+		engine.Use(gin.Recovery())
+		for _, m := range o.Middlewares {
+			engine.Use(m.WrapHandler())
+		}
+	}
+}
+
 type server struct {
 	engine *gin.Engine
 	config *nconf.Config
@@ -50,7 +70,7 @@ func (s *server) Group(relativePath string, handlers ...HandlerFunc) RouterGroup
 }
 
 // NewServer -
-func NewServer(config *nconf.Config, middleware ...HandlerFunc) (Server, error) {
+func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -67,21 +87,12 @@ func NewServer(config *nconf.Config, middleware ...HandlerFunc) (Server, error) 
 	}
 
 	engine := gin.New()
-
 	engine.MaxMultipartMemory = webConfig.MaxMultipartMemory
 
-	if len(middleware) == 0 {
-		engine.Use(
-			gin.Recovery(),
-			BindMDC(config).WrapHandler(),
-			Logging().WrapHandler(),
-		)
-	} else {
-		engine.Use(gin.Recovery())
-		for _, m := range middleware {
-			engine.Use(m.WrapHandler())
-		}
+	if option == nil {
+		option = &ServerOption{}
 	}
+	option.setMiddlewaresToEngine(engine)
 
 	s := &server{
 		engine: engine,
@@ -117,8 +128,8 @@ func NewServer(config *nconf.Config, middleware ...HandlerFunc) (Server, error) 
 }
 
 // MustNewServer -
-func MustNewServer(config *nconf.Config, middleware ...HandlerFunc) Server {
-	server, err := NewServer(config, middleware...)
+func MustNewServer(config *nconf.Config, option *ServerOption) Server {
+	server, err := NewServer(config, option)
 	if err != nil {
 		nlog.Fatal("fail to init http server: ", err)
 	}

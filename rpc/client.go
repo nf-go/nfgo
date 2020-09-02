@@ -67,13 +67,13 @@ func dialConn(config *nconf.RPCClientConfig) (*grpc.ClientConn, error) {
 			grpc.MaxCallSendMsgSize(config.MaxCallSendMsgSize),
 			grpc.MaxCallRecvMsgSize(config.MaxCallRecvMsgSize),
 		),
-		grpc.WithChainUnaryInterceptor(interceptor.ChainUnaryClientInterceptor(
+		grpc.WithChainUnaryInterceptor(
 			interceptor.MDCBindingUnaryClientInterceptor,
 			interceptor.ValidateUnaryClientInterceptor,
-		)),
-		grpc.WithChainStreamInterceptor(interceptor.ChainStreamClientInterceptor(
+		),
+		grpc.WithChainStreamInterceptor(
 			interceptor.MDCBindingStreamClientInterceptor,
-		)),
+		),
 	}
 	if ntypes.BoolValue(config.Plaintext) {
 		dialOptions = append(dialOptions, grpc.WithInsecure())

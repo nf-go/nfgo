@@ -22,37 +22,56 @@ type Server interface {
 	GRPCServer() *grpc.Server
 }
 
-// NewServer -
-func NewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor) (Server, error) {
-	if config == nil {
-		return nil, errors.New("config is nill")
-	}
+// ServerOption -
+type ServerOption struct {
+	UnaryServerInterceptors  []grpc.UnaryServerInterceptor
+	StreamServerInterceptors []grpc.StreamServerInterceptor
+}
 
-	rpcConfig := config.RPC
-	if rpcConfig == nil {
-		return nil, errors.New("rpc config is not initialized in the config")
-	}
-
-	var chainInterceptor grpc.UnaryServerInterceptor
-
-	if len(interceptors) == 0 {
-		chainInterceptor = interceptor.ChainUnaryServerInterceptor(
+func (o *ServerOption) setDefaultValue() {
+	if len(o.UnaryServerInterceptors) == 0 {
+		o.UnaryServerInterceptors = []grpc.UnaryServerInterceptor{
 			interceptor.RecoverUnaryServerInterceptor,
 			interceptor.MDCBindingUnaryServerInterceptor,
 			interceptor.ValidateUnaryServerInterceptor,
 			interceptor.LoggingUnaryServerInterceptor,
-			interceptor.ErrorHandleUnaryServerInterceptor)
+			interceptor.ErrorHandleUnaryServerInterceptor,
+		}
 	} else {
 		intercepts := []grpc.UnaryServerInterceptor{
 			interceptor.RecoverUnaryServerInterceptor,
 		}
-		intercepts = append(intercepts, interceptors...)
-		chainInterceptor = interceptor.ChainUnaryServerInterceptor(intercepts...)
+		o.UnaryServerInterceptors = append(intercepts, o.UnaryServerInterceptors...)
 	}
+
+	if len(o.StreamServerInterceptors) == 0 {
+		o.StreamServerInterceptors = []grpc.StreamServerInterceptor{}
+	} else {
+		intercepts := []grpc.StreamServerInterceptor{
+			interceptor.RecoverStreamServerInterceptor,
+		}
+		o.StreamServerInterceptors = append(intercepts, o.StreamServerInterceptors...)
+	}
+}
+
+// NewServer -
+func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
+	if config == nil {
+		return nil, errors.New("config is nill")
+	}
+	rpcConfig := config.RPC
+	if rpcConfig == nil {
+		return nil, errors.New("rpc config is not initialized in the config")
+	}
+	if option == nil {
+		option = &ServerOption{}
+	}
+	option.setDefaultValue()
 
 	opts := []grpc.ServerOption{
 		grpc.MaxRecvMsgSize(int(rpcConfig.MaxRecvMsgSize)),
-		grpc.UnaryInterceptor(chainInterceptor),
+		grpc.ChainUnaryInterceptor(option.UnaryServerInterceptors...),
+		grpc.ChainStreamInterceptor(option.StreamServerInterceptors...),
 	}
 
 	grpcServer := grpc.NewServer(opts...)
@@ -70,8 +89,8 @@ func NewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor
 }
 
 // MustNewServer -
-func MustNewServer(config *nconf.Config, interceptors ...grpc.UnaryServerInterceptor) Server {
-	grpcServer, err := NewServer(config, interceptors...)
+func MustNewServer(config *nconf.Config, option *ServerOption) Server {
+	grpcServer, err := NewServer(config, option)
 	if err != nil {
 		nlog.Fatal("fail to init grpc server: ", err)
 	}

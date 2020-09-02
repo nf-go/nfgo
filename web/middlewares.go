@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 
-	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nconst"
 	"nfgo.ga/nfgo/ncontext"
 	"nfgo.ga/nfgo/nlog"
@@ -13,7 +12,7 @@ import (
 )
 
 // BindMDC - BindMDC MiddleWare
-func BindMDC(conf *nconf.Config) HandlerFunc {
+func BindMDC() HandlerFunc {
 	return func(c *Context) {
 		mdc := ncontext.NewMDC()
 
