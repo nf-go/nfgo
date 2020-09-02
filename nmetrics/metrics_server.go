@@ -25,6 +25,8 @@ type Server interface {
 
 	RegisterCollectors(collectors ...prometheus.Collector) error
 
+	MustRegisterCollectors(collectors ...prometheus.Collector)
+
 	GrpcMetricsUnaryServerInterceptor() func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error)
 
 	GrpcMetricsStramServerInterceptor() func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
@@ -129,4 +131,10 @@ func (s *server) RegisterCollectors(collectors ...prometheus.Collector) error {
 		}
 	}
 	return nil
+}
+
+func (s *server) MustRegisterCollectors(collectors ...prometheus.Collector) {
+	if err := s.RegisterCollectors(collectors...); err != nil {
+		nlog.Fatal("fail to register collectors: ", err)
+	}
 }
