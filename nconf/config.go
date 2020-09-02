@@ -94,6 +94,7 @@ type RPCConfig struct {
 type RPCClientConfig struct {
 	Addr               string `yaml:"addr"`
 	Plaintext          *bool  `yaml:"plaintext"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
 	MaxCallSendMsgSize int    `yaml:"maxCallSendMsgSize"`
 	MaxCallRecvMsgSize int    `yaml:"maxCallRecvMsgSize"`
 }

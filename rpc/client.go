@@ -1,11 +1,13 @@
 package rpc
 
 import (
+	"crypto/tls"
 	"errors"
 
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/ntypes"
@@ -77,6 +79,11 @@ func dialConn(config *nconf.RPCClientConfig) (*grpc.ClientConn, error) {
 	}
 	if ntypes.BoolValue(config.Plaintext) {
 		dialOptions = append(dialOptions, grpc.WithInsecure())
+	} else {
+		creds := credentials.NewTLS(&tls.Config{
+			InsecureSkipVerify: config.InsecureSkipVerify,
+		})
+		dialOptions = append(dialOptions, grpc.WithTransportCredentials(creds))
 	}
 
 	// Dial connection
