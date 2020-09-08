@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 )
 
 // Server -
@@ -80,6 +81,10 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 		healthServer := health.NewServer()
 		healthServer.SetServingStatus("grpc.health.v1.Health", 1)
 		healthpb.RegisterHealthServer(grpcServer, healthServer)
+	}
+
+	if ntypes.BoolValue(rpcConfig.RegisterReflectionServer) {
+		reflection.Register(grpcServer)
 	}
 
 	return &server{

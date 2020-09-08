@@ -84,6 +84,9 @@ func (conf *RPCConfig) setDefaultValues() error {
 	if conf.RegisterHealthServer == nil {
 		conf.RegisterHealthServer = ntypes.Bool(true)
 	}
+	if conf.RegisterReflectionServer == nil {
+		conf.RegisterReflectionServer = ntypes.Bool(true)
+	}
 	for _, clientConf := range conf.Clients {
 		if clientConf != nil {
 			if err := clientConf.setDefaultValues(); err != nil {
