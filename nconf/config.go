@@ -8,14 +8,15 @@ import (
 
 // Config data
 type Config struct {
-	App      *AppConfig      `yaml:"app"`
-	Log      *LogConfig      `yaml:"log"`
-	DB       *DbConfig       `yaml:"db"`
-	Redis    *RedisConfig    `yaml:"redis"`
-	Web      *WebConfig      `yaml:"web"`
-	RPC      *RPCConfig      `yaml:"rpc"`
-	Security *SecurityConfig `yaml:"security"`
-	Metrics  *MetricsConfig  `yaml:"metrics"`
+	App              *AppConfig              `yaml:"app"`
+	Log              *LogConfig              `yaml:"log"`
+	DB               *DbConfig               `yaml:"db"`
+	Redis            *RedisConfig            `yaml:"redis"`
+	Web              *WebConfig              `yaml:"web"`
+	RPC              *RPCConfig              `yaml:"rpc"`
+	Security         *SecurityConfig         `yaml:"security"`
+	Metrics          *MetricsConfig          `yaml:"metrics"`
+	GraceTermination *GraceTerminationConfig `yaml:"graceTermination"`
 }
 
 // AppConfig -
@@ -160,4 +161,9 @@ type MetricsConfig struct {
 	Host        string `yaml:"host"`
 	Port        int32  `yaml:"port"`
 	MetricsPath string `yaml:"metricsPath"`
+}
+
+// GraceTerminationConfig -
+type GraceTerminationConfig struct {
+	GraceTerminationPeriod time.Duration `yaml:"graceTerminationPeriod"`
 }

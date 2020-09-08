@@ -19,6 +19,9 @@ func setDefaultValues(configs ...interface{ setDefaultValues() error }) error {
 }
 
 func (conf *Config) setDefaultValues() error {
+	if conf.GraceTermination == nil {
+		conf.GraceTermination = &GraceTerminationConfig{}
+	}
 	return setDefaultValues(
 		conf.DB,
 		conf.Redis,
@@ -26,6 +29,7 @@ func (conf *Config) setDefaultValues() error {
 		conf.RPC,
 		conf.Security,
 		conf.Metrics,
+		conf.GraceTermination,
 	)
 }
 
@@ -129,6 +133,13 @@ func (conf *MetricsConfig) setDefaultValues() error {
 	}
 	if conf.MetricsPath == "" {
 		conf.MetricsPath = "/metrics"
+	}
+	return nil
+}
+
+func (conf *GraceTerminationConfig) setDefaultValues() error {
+	if conf.GraceTerminationPeriod == 0 {
+		conf.GraceTerminationPeriod = 5 * time.Second
 	}
 	return nil
 }

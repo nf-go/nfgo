@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -20,6 +21,7 @@ import (
 type Server interface {
 	Run() error
 	MustRun()
+	Shutdown(ctx context.Context) error
 	GRPCServer() *grpc.Server
 }
 
@@ -132,4 +134,9 @@ func (s *server) MustRun() {
 	if err := s.Run(); err != nil {
 		nlog.Fatal("fail to start grpc server: ", err)
 	}
+}
+
+func (s *server) Shutdown(ctx context.Context) error {
+	s.Server.GracefulStop()
+	return nil
 }

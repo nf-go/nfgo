@@ -1,8 +1,10 @@
 package web
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -17,6 +19,8 @@ import (
 type Server interface {
 	Run() error
 	MustRun()
+	Shutdown(ctx context.Context) error
+	RegisterOnShutdown(f func())
 	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
 }
 
@@ -43,18 +47,19 @@ func (o *ServerOption) setMiddlewaresToEngine(engine *gin.Engine) {
 type server struct {
 	engine *gin.Engine
 	config *nconf.Config
-	host   string
-	port   int32
+	// host       string
+	// port       int32
+	httpServer *http.Server
 }
 
 func (s *server) Run() error {
-	addr := fmt.Sprintf("%s:%d", s.host, s.port)
-	nlog.Info("the web server is started and serving on ", addr)
-	err := s.engine.Run(addr)
-	if err != nil {
+	nlog.Info("the web server is started and serving on ", s.httpServer.Addr)
+
+	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		nlog.Error("the web server is stoped  with error ", err)
+		return err
 	}
-	return err
+	return nil
 }
 
 func (s *server) MustRun() {
@@ -63,10 +68,43 @@ func (s *server) MustRun() {
 	}
 }
 
+func (s *server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
+}
+
+func (s *server) RegisterOnShutdown(f func()) {
+	s.httpServer.RegisterOnShutdown(f)
+}
+
 func (s *server) Group(relativePath string, handlers ...HandlerFunc) RouterGroup {
 	ginHandlers := toGinHandlers(handlers...)
 	ginGroup := s.engine.Group(relativePath, ginHandlers...)
 	return &routerGroup{ginGroup: ginGroup}
+}
+
+func (s *server) configSwagger() error {
+	webConf := s.config.Web
+	swaggerConf := webConf.Swagger
+	if swaggerConf != nil && swaggerConf.Enabled {
+		swagURL := swaggerConf.URL
+		if swagURL == "" {
+			if webConf.Host == "0.0.0.0" {
+				swagURL = fmt.Sprintf("http://127.0.0.1:%d/apidoc/doc.json", webConf.Port)
+			} else {
+				swagURL = fmt.Sprintf("http://%s:%d/apidoc/doc.json", webConf.Host, webConf.Port)
+			}
+		}
+
+		u, err := url.Parse(swagURL)
+		if err != nil {
+			return fmt.Errorf("fail to parse swagger url: %w", err)
+		}
+
+		relativePath := strings.ReplaceAll(u.Path, "/doc.json", "")
+
+		s.engine.GET(relativePath+"/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL(swagURL)))
+	}
+	return nil
 }
 
 // NewServer -
@@ -86,42 +124,29 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 		return nil, errors.New("web config is not initialized in the config")
 	}
 
+	// gin engine
 	engine := gin.New()
 	engine.MaxMultipartMemory = webConfig.MaxMultipartMemory
-
 	if option == nil {
 		option = &ServerOption{}
 	}
 	option.setMiddlewaresToEngine(engine)
 
+	// http server
+	httpServer := &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", webConfig.Host, webConfig.Port),
+		Handler: engine,
+	}
+
 	s := &server{
-		engine: engine,
-		config: config,
-		host:   webConfig.Host,
-		port:   webConfig.Port,
+		engine:     engine,
+		config:     config,
+		httpServer: httpServer,
 	}
 
 	// config swagger
-	swaggerConf := webConfig.Swagger
-	if swaggerConf != nil && swaggerConf.Enabled {
-
-		swagURL := swaggerConf.URL
-		if swagURL == "" {
-			if s.host == "0.0.0.0" {
-				swagURL = fmt.Sprintf("http://127.0.0.1:%d/apidoc/doc.json", s.port)
-			} else {
-				swagURL = fmt.Sprintf("http://%s:%d/apidoc/doc.json", s.host, s.port)
-			}
-		}
-
-		u, err := url.Parse(swagURL)
-		if err != nil {
-			return nil, fmt.Errorf("fail to parse swagger url: %w", err)
-		}
-
-		relativePath := strings.ReplaceAll(u.Path, "/doc.json", "")
-
-		engine.GET(relativePath+"/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL(swagURL)))
+	if err := s.configSwagger(); err != nil {
+		return nil, err
 	}
 
 	return s, nil
