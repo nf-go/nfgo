@@ -19,9 +19,11 @@ import (
 
 // Server -
 type Server interface {
-	Run(serverOption *ServerOption) error
+	Run() error
 
-	MustRun(serverOption *ServerOption)
+	MustRun()
+
+	Shutdown(ctx context.Context) error
 
 	RegisterCollectors(collectors ...prometheus.Collector) error
 
@@ -41,7 +43,7 @@ type ServerOption struct {
 }
 
 // NewServer -
-func NewServer(config *nconf.Config) (Server, error) {
+func NewServer(config *nconf.Config, serverOption *ServerOption) (Server, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -54,6 +56,14 @@ func NewServer(config *nconf.Config) (Server, error) {
 	s := &server{
 		registry:      prometheus.NewRegistry(),
 		metricsConfig: metricsConfig,
+		serverOption:  serverOption,
+	}
+
+	serverMux := http.NewServeMux()
+	serverMux.Handle(metricsConfig.MetricsPath, promhttp.HandlerFor(s.registry, promhttp.HandlerOpts{}))
+	s.httpServer = &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", metricsConfig.Host, metricsConfig.Port),
+		Handler: serverMux,
 	}
 
 	if err := s.registerCollectors(config); err != nil {
@@ -64,8 +74,8 @@ func NewServer(config *nconf.Config) (Server, error) {
 }
 
 // MustNewServer -
-func MustNewServer(config *nconf.Config) Server {
-	server, err := NewServer(config)
+func MustNewServer(config *nconf.Config, serverOption *ServerOption) Server {
+	server, err := NewServer(config, serverOption)
 	if err != nil {
 		nlog.Fatal("fail to init promtheus metrics server: ", err)
 	}
@@ -74,6 +84,8 @@ func MustNewServer(config *nconf.Config) Server {
 
 type server struct {
 	metricsConfig        *nconf.MetricsConfig
+	serverOption         *ServerOption
+	httpServer           *http.Server
 	registry             *prometheus.Registry
 	grpcMetricsCollector *grpc_prometheus.ServerMetrics
 	webMetricsCollector  *webMetrics
@@ -90,14 +102,18 @@ func (s *server) registerCollectors(config *nconf.Config) error {
 	return s.regitserWebCollector(config)
 }
 
-func (s *server) Run(serverOption *ServerOption) error {
+func (s *server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
+}
 
-	if serverOption != nil {
-		rpcServer := serverOption.RPCServer
+func (s *server) Run() error {
+
+	if s.serverOption != nil {
+		rpcServer := s.serverOption.RPCServer
 		if rpcServer != nil && rpcServer.GRPCServer() != nil {
 			grpc_prometheus.Register(rpcServer.GRPCServer())
 		}
-		db := serverOption.DB
+		db := s.serverOption.DB
 		if db != nil {
 			if err := db.Use(s.gormPrometheusPlugin()); err != nil {
 				return err
@@ -105,12 +121,8 @@ func (s *server) Run(serverOption *ServerOption) error {
 		}
 	}
 
-	metricsConfig := s.metricsConfig
-	addr := fmt.Sprintf("%s:%d", metricsConfig.Host, metricsConfig.Port)
-	serverMux := http.NewServeMux()
-	serverMux.Handle(metricsConfig.MetricsPath, promhttp.HandlerFor(s.registry, promhttp.HandlerOpts{}))
-	nlog.Infof("the prometheus metrics server is started and serving on http://%s%s", addr, metricsConfig.MetricsPath)
-	if err := http.ListenAndServe(addr, serverMux); err != nil {
+	nlog.Infof("the prometheus metrics server is started and serving on http://%s%s", s.httpServer.Addr, s.metricsConfig.MetricsPath)
+	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		nlog.Error("the prometheus metrics server is stoped with error ", err)
 		return err
 	}
@@ -118,8 +130,8 @@ func (s *server) Run(serverOption *ServerOption) error {
 	return nil
 }
 
-func (s *server) MustRun(serverOption *ServerOption) {
-	if err := s.Run(serverOption); err != nil {
+func (s *server) MustRun() {
+	if err := s.Run(); err != nil {
 		nlog.Fatal("fail to start promtheus metrics server: ", err)
 	}
 }

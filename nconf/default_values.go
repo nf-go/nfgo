@@ -139,7 +139,7 @@ func (conf *MetricsConfig) setDefaultValues() error {
 
 func (conf *GraceTerminationConfig) setDefaultValues() error {
 	if conf.GraceTerminationPeriod == 0 {
-		conf.GraceTerminationPeriod = 5 * time.Second
+		conf.GraceTerminationPeriod = 10 * time.Second
 	}
 	return nil
 }

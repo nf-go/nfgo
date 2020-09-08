@@ -6,15 +6,17 @@ import (
 	"errors"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
 )
 
-// GraceTerminationServer -
-type GraceTerminationServer interface {
+// GraceTerminatedServer -
+type GraceTerminatedServer interface {
 	MustServe()
+	RegisterOnShutdown(f func())
 }
 
 // Server -
@@ -24,33 +26,41 @@ type Server interface {
 	Shutdown(ctx context.Context) error
 }
 
-// NewGraceTerminationServer -
-func NewGraceTerminationServer(config *nconf.Config, servers ...Server) (GraceTerminationServer, error) {
+// NewGraceTerminatedServer -
+func NewGraceTerminatedServer(config *nconf.Config, servers ...Server) (GraceTerminatedServer, error) {
 	if config == nil {
 		return nil, errors.New("config is nill")
 	}
-	return &graceTerminationServer{
+	return &graceTerminatedServer{
 		servers: servers,
 		config:  config,
 	}, nil
 }
 
-// MustNewGraceTerminationServer -
-func MustNewGraceTerminationServer(config *nconf.Config, servers ...Server) GraceTerminationServer {
-	server, err := NewGraceTerminationServer(config, servers...)
+// MustNewGraceTerminatedServer -
+func MustNewGraceTerminatedServer(config *nconf.Config, servers ...Server) GraceTerminatedServer {
+	server, err := NewGraceTerminatedServer(config, servers...)
 	if err != nil {
 		nlog.Fatal("fail to init grace termination server: ", err)
 	}
 	return server
 }
 
-type graceTerminationServer struct {
-	config  *nconf.Config
-	servers []Server
+type graceTerminatedServer struct {
+	config     *nconf.Config
+	servers    []Server
+	onShutdown []func()
+	mu         sync.Mutex
+}
+
+func (s *graceTerminatedServer) RegisterOnShutdown(f func()) {
+	s.mu.Lock()
+	s.onShutdown = append(s.onShutdown, f)
+	s.mu.Unlock()
 }
 
 // Serve -
-func (s *graceTerminationServer) MustServe() {
+func (s *graceTerminatedServer) MustServe() {
 	for _, server := range s.servers {
 		go server.MustRun()
 	}
@@ -75,10 +85,13 @@ func (s *graceTerminationServer) MustServe() {
 			errs.addError(err)
 		}
 	}
+	for _, f := range s.onShutdown {
+		f()
+	}
 	if errs.isNil() {
 		nlog.Info("the server is stopped normally.")
 	} else {
-		nlog.Fatal("the server is forced to stop.", errs)
+		nlog.Error("the server is forced to stop.", errs)
 	}
 }
 
