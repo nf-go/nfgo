@@ -31,7 +31,9 @@ func (cs clientConns) GetClientConn(svcName string) *grpc.ClientConn {
 
 func (cs clientConns) CloseAll() {
 	for _, conn := range cs {
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			nlog.Error("fail to close grpc client conn: ", err)
+		}
 	}
 }
 
