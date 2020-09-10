@@ -94,7 +94,7 @@ func setLevel(logEntry *logrus.Entry, logConf *nconf.LogConfig) {
 func setFormatter(logEntry *logrus.Entry, logConf *nconf.LogConfig) {
 	var timestampFormat string
 	if logConf.TimestampFormat == "" {
-		timestampFormat = "2006-01-02 15:04:05.000"
+		timestampFormat = "2006-01-02T15:04:05.000Z07:00"
 	} else {
 		timestampFormat = logConf.TimestampFormat
 	}
