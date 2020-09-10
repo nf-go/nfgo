@@ -2,6 +2,7 @@ package interceptor
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -22,12 +23,16 @@ func LoggingUnaryServerInterceptor(ctx context.Context, req interface{}, info *g
 				errLogger.Error()
 			}
 		} else if logger.Logger.IsLevelEnabled(logrus.DebugLevel) {
-			logger.WithField("resp", resp).Debug()
+			if stringer, ok := resp.(fmt.Stringer); ok {
+				logger.WithField("resp", stringer.String()).Debug()
+			}
 		}
 
 	}()
 
-	nlog.Logger(ctx).WithField("req", req).Info()
+	if stringer, ok := req.(fmt.Stringer); ok {
+		nlog.Logger(ctx).WithField("req", stringer.String()).Info()
+	}
 	return handler(ctx, req)
 }
 

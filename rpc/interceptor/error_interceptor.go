@@ -25,7 +25,6 @@ func ErrorHandleStreamServerInterceptor(srv interface{}, stream grpc.ServerStrea
 
 func handleError(ctx context.Context, err error) error {
 	if err != nil {
-		// 处理业务错误
 		if bizErr, ok := err.(nerrors.BizError); ok {
 			return grpc.Errorf(codes.Code(bizErr.Code()), bizErr.Msg())
 		}

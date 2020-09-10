@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -35,7 +36,9 @@ func (c *Context) Success(data interface{}) {
 	// logging the resp
 	respLogger := nlog.Logger(c)
 	if respLogger.Logger.IsLevelEnabled(logrus.DebugLevel) {
-		respLogger.WithField("resp", r).Debug()
+		if respJSON, err := json.Marshal(r); err == nil {
+			respLogger.WithField("resp", string(respJSON)).Debug()
+		}
 	}
 
 	c.JSON(http.StatusOK, r)
