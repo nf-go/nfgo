@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"nfgo.ga/nfgo/nconf"
 
@@ -58,8 +59,12 @@ func setOutput(logEntry *logrus.Entry, config *nconf.Config) {
 		hostname, _ := os.Hostname()
 		logFilename = fmt.Sprintf("%s.%s.%s.log", config.App.Name, config.App.Profile, hostname)
 	}
-	fullLocation := filepath.Join(logConf.LogPath, logFilename)
-	logFile, err := os.OpenFile(fullLocation, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logPath := filepath.Join(logConf.LogPath, time.Now().Format("200601"))
+	if err := os.MkdirAll(logPath, 0755); err != nil {
+		log.Fatal("can't create log dir: ", err)
+	}
+	fullFilename := filepath.Join(logPath, logFilename)
+	logFile, err := os.OpenFile(fullFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal("can't open log file: ", err)
 	}
