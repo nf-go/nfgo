@@ -17,8 +17,8 @@ import (
 
 // Server -
 type Server interface {
-	Run() error
-	MustRun()
+	Serve() error
+	MustServe()
 	Shutdown(ctx context.Context) error
 	RegisterOnShutdown(f func())
 	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
@@ -52,7 +52,7 @@ type server struct {
 	httpServer *http.Server
 }
 
-func (s *server) Run() error {
+func (s *server) Serve() error {
 	nlog.Info("the web server is started and serving on ", s.httpServer.Addr)
 
 	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -62,8 +62,8 @@ func (s *server) Run() error {
 	return nil
 }
 
-func (s *server) MustRun() {
-	if err := s.Run(); err != nil {
+func (s *server) MustServe() {
+	if err := s.Serve(); err != nil {
 		nlog.Fatal("fail to start http server:", err)
 	}
 }

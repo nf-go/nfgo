@@ -19,8 +19,8 @@ import (
 
 // Server -
 type Server interface {
-	Run() error
-	MustRun()
+	Serve() error
+	MustServe()
 	Shutdown(ctx context.Context) error
 	GRPCServer() *grpc.Server
 }
@@ -114,7 +114,7 @@ func (s *server) GRPCServer() *grpc.Server {
 	return s.Server
 }
 
-func (s *server) Run() error {
+func (s *server) Serve() error {
 	addr := fmt.Sprintf("%s:%d", s.host, s.port)
 	listen, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -122,7 +122,7 @@ func (s *server) Run() error {
 	}
 
 	nlog.Info("the grpc server is started and serving on ", addr)
-	if err = s.Serve(listen); err != nil {
+	if err = s.Server.Serve(listen); err != nil {
 		nlog.Error("the grpc server is stoped  with error ", err)
 		return err
 	}
@@ -130,8 +130,8 @@ func (s *server) Run() error {
 	return nil
 }
 
-func (s *server) MustRun() {
-	if err := s.Run(); err != nil {
+func (s *server) MustServe() {
+	if err := s.Serve(); err != nil {
 		nlog.Fatal("fail to start grpc server: ", err)
 	}
 }

@@ -19,9 +19,9 @@ import (
 
 // Server -
 type Server interface {
-	Run() error
+	Serve() error
 
-	MustRun()
+	MustServe()
 
 	Shutdown(ctx context.Context) error
 
@@ -106,7 +106,7 @@ func (s *server) Shutdown(ctx context.Context) error {
 	return s.httpServer.Shutdown(ctx)
 }
 
-func (s *server) Run() error {
+func (s *server) Serve() error {
 
 	if s.serverOption != nil {
 		rpcServer := s.serverOption.RPCServer
@@ -130,8 +130,8 @@ func (s *server) Run() error {
 	return nil
 }
 
-func (s *server) MustRun() {
-	if err := s.Run(); err != nil {
+func (s *server) MustServe() {
+	if err := s.Serve(); err != nil {
 		nlog.Fatal("fail to start promtheus metrics server: ", err)
 	}
 }

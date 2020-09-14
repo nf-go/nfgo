@@ -21,8 +21,8 @@ type GraceTerminatedServer interface {
 
 // Server -
 type Server interface {
-	Run() error
-	MustRun()
+	Serve() error
+	MustServe()
 	Shutdown(ctx context.Context) error
 }
 
@@ -62,7 +62,7 @@ func (s *graceTerminatedServer) RegisterOnShutdown(f func()) {
 // Serve -
 func (s *graceTerminatedServer) MustServe() {
 	for _, server := range s.servers {
-		go server.MustRun()
+		go server.MustServe()
 	}
 
 	// Wait for interrupt signal to gracefully shutdown the server with
