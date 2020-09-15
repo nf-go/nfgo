@@ -20,7 +20,7 @@ func MDCBindingUnaryClientInterceptor(ctx context.Context, method string, req in
 	kv := []string{
 		nconst.HeaderTraceID, mdc.TraceID(),
 		nconst.HeaderRealIP, mdc.ClientIP(),
-		nconst.HeaderClientType, mdc.ClientIP(),
+		nconst.HeaderClientType, mdc.ClientType(),
 		nconst.HeaderSub, mdc.SubjectID(),
 	}
 	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
@@ -36,7 +36,7 @@ func MDCBindingStreamClientInterceptor(ctx context.Context, desc *grpc.StreamDes
 	kv := []string{
 		nconst.HeaderTraceID, mdc.TraceID(),
 		nconst.HeaderRealIP, mdc.ClientIP(),
-		nconst.HeaderClientType, mdc.ClientIP(),
+		nconst.HeaderClientType, mdc.ClientType(),
 		nconst.HeaderSub, mdc.SubjectID(),
 	}
 	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
