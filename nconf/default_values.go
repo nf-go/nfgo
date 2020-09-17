@@ -27,6 +27,7 @@ func (conf *Config) setDefaultValues() error {
 		conf.Redis,
 		conf.Web,
 		conf.RPC,
+		conf.CronConfig,
 		conf.Security,
 		conf.Metrics,
 		conf.GraceTermination,
@@ -140,6 +141,13 @@ func (conf *MetricsConfig) setDefaultValues() error {
 func (conf *GraceTerminationConfig) setDefaultValues() error {
 	if conf.GraceTerminationPeriod == 0 {
 		conf.GraceTerminationPeriod = 10 * time.Second
+	}
+	return nil
+}
+
+func (conf *CronConfig) setDefaultValues() error {
+	if conf.SkipIfStillRunning == nil {
+		conf.SkipIfStillRunning = ntypes.Bool(true)
 	}
 	return nil
 }

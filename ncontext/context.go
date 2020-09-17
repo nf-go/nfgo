@@ -57,7 +57,7 @@ func CurrentMDC(ctx context.Context) (MDC, error) {
 	if mc, ok := v.(MDC); ok {
 		return MDC(mc), nil
 	}
-	return nil, errors.New("Can't extract MDC from the context")
+	return nil, errors.New("can't extract MDC from the context")
 }
 
 type mdc struct {

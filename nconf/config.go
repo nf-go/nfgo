@@ -14,6 +14,7 @@ type Config struct {
 	Redis            *RedisConfig            `yaml:"redis"`
 	Web              *WebConfig              `yaml:"web"`
 	RPC              *RPCConfig              `yaml:"rpc"`
+	CronConfig       *CronConfig             `yaml:"cron"`
 	Security         *SecurityConfig         `yaml:"security"`
 	Metrics          *MetricsConfig          `yaml:"metrics"`
 	GraceTermination *GraceTerminationConfig `yaml:"graceTermination"`
@@ -166,4 +167,16 @@ type MetricsConfig struct {
 // GraceTerminationConfig -
 type GraceTerminationConfig struct {
 	GraceTerminationPeriod time.Duration `yaml:"graceTerminationPeriod"`
+}
+
+// CronConfig -
+type CronConfig struct {
+	SkipIfStillRunning *bool            `yaml:"skipIfStillRunning"`
+	CronJobs           []*CronJobConfig `yaml:"cronJobs"`
+}
+
+// CronJobConfig -
+type CronJobConfig struct {
+	Name     string `yaml:"name"`
+	Schedule string `yaml:"schedule"`
 }
