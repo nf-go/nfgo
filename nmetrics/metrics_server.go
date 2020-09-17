@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/rpc"
 	"nfgo.ga/nfgo/web"
@@ -19,11 +20,7 @@ import (
 
 // Server -
 type Server interface {
-	Serve() error
-
-	MustServe()
-
-	Shutdown(ctx context.Context) error
+	ngrace.Server
 
 	RegisterCollectors(collectors ...prometheus.Collector) error
 

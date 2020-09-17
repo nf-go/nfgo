@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/ntypes"
 	"nfgo.ga/nfgo/rpc/interceptor"
@@ -19,9 +20,7 @@ import (
 
 // Server -
 type Server interface {
-	Serve() error
-	MustServe()
-	Shutdown(ctx context.Context) error
+	ngrace.Server
 	GRPCServer() *grpc.Server
 }
 

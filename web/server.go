@@ -12,14 +12,13 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
 )
 
 // Server -
 type Server interface {
-	Serve() error
-	MustServe()
-	Shutdown(ctx context.Context) error
+	ngrace.Server
 	RegisterOnShutdown(f func())
 	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
 }

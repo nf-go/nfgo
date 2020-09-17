@@ -13,7 +13,6 @@ import (
 	"nfgo.ga/nfgo/nlog"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"nfgo.ga/nfgo/nerrors"
 )
 
@@ -35,7 +34,7 @@ func (c *Context) Success(data interface{}) {
 
 	// logging the resp
 	respLogger := nlog.Logger(c)
-	if respLogger.Logger.IsLevelEnabled(logrus.DebugLevel) {
+	if respLogger.IsLevelEnabled(nlog.DebugLevel) {
 		if respJSON, err := json.Marshal(r); err == nil {
 			respLogger.WithField("resp", string(respJSON)).Debug()
 		}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
 	"nfgo.ga/nfgo/nconf"
@@ -19,7 +18,7 @@ type dbLogger struct {
 }
 
 func newLogger(config *nconf.DbConfig) *dbLogger {
-	nlogLevel := nlog.Logger(context.Background()).Logger.Level.String()
+	nlogLevel := nlog.Logger(context.Background()).LevelString()
 	logLevel := logger.Silent
 	switch nlogLevel {
 	case "debug":
@@ -85,9 +84,9 @@ func (l *dbLogger) Trace(ctx context.Context, begin time.Time, fc func() (string
 	}
 }
 
-func logEnry(ctx context.Context, fileWithLineNum string, elapsed time.Duration, fc func() (string, int64)) *logrus.Entry {
+func logEnry(ctx context.Context, fileWithLineNum string, elapsed time.Duration, fc func() (string, int64)) nlog.NLogger {
 	sql, rows := fc()
-	return nlog.Logger(ctx).WithFields(logrus.Fields{
+	return nlog.Logger(ctx).WithFields(nlog.Fields{
 		"fileWithLineNum": fileWithLineNum,
 		"rowsAffected":    rows,
 		"elapsed":         elapsed.Milliseconds(),

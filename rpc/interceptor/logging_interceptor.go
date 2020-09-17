@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"nfgo.ga/nfgo/nerrors"
 	"nfgo.ga/nfgo/nlog"
@@ -22,7 +21,7 @@ func LoggingUnaryServerInterceptor(ctx context.Context, req interface{}, info *g
 			} else {
 				errLogger.Error()
 			}
-		} else if logger.Logger.IsLevelEnabled(logrus.DebugLevel) {
+		} else if logger.IsLevelEnabled(nlog.DebugLevel) {
 			if stringer, ok := resp.(fmt.Stringer); ok {
 				logger.WithField("resp", stringer.String()).Debug()
 			}
