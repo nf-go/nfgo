@@ -14,7 +14,6 @@ import (
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/rpc"
 	"nfgo.ga/nfgo/web"
 )
 
@@ -35,8 +34,7 @@ type Server interface {
 
 // ServerOption -
 type ServerOption struct {
-	RPCServer rpc.Server
-	DB        *gorm.DB
+	DB *gorm.DB
 }
 
 // NewServer -
@@ -106,10 +104,6 @@ func (s *server) Shutdown(ctx context.Context) error {
 func (s *server) Serve() error {
 
 	if s.serverOption != nil {
-		rpcServer := s.serverOption.RPCServer
-		if rpcServer != nil && rpcServer.GRPCServer() != nil {
-			grpc_prometheus.Register(rpcServer.GRPCServer())
-		}
 		db := s.serverOption.DB
 		if db != nil {
 			if err := db.Use(s.gormPrometheusPlugin()); err != nil {

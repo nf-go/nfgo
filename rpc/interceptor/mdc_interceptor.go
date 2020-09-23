@@ -50,19 +50,12 @@ func MDCBindingUnaryServerInterceptor(ctx context.Context, req interface{}, info
 
 // MDCBindingStreamServerInterceptor -
 func MDCBindingStreamServerInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	s := &nstream{
-		Stream: stream,
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	s.Cancel = cancel
-	ctx, err := bindMDCToContext(ctx, info.FullMethod)
+	s := &serverStreamWrapper{stream: stream}
+	ctx, err := bindMDCToContext(stream.Context(), info.FullMethod)
 	if err != nil {
 		return err
 	}
-	s.SetContext(ctx)
-
+	s.ctx = ctx
 	return handler(srv, s)
 }
 

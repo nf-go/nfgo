@@ -74,9 +74,12 @@ func dialConn(config *nconf.RPCClientConfig) (*grpc.ClientConn, error) {
 		grpc.WithChainUnaryInterceptor(
 			interceptor.MDCBindingUnaryClientInterceptor,
 			interceptor.ValidateUnaryClientInterceptor,
+			interceptor.LoggingUnaryClientInterceptor,
 		),
 		grpc.WithChainStreamInterceptor(
 			interceptor.MDCBindingStreamClientInterceptor,
+			interceptor.ValidateStreamClientInterceptor,
+			interceptor.LoggingStreamClientInterceptor,
 		),
 	}
 	if ntypes.BoolValue(config.Plaintext) {
@@ -92,12 +95,16 @@ func dialConn(config *nconf.RPCClientConfig) (*grpc.ClientConn, error) {
 	return grpc.Dial(config.Addr, dialOptions...)
 }
 
-// MustDialClientConnPlaintext -
-func MustDialClientConnPlaintext(addr string) *grpc.ClientConn {
+// DialClientConnPlaintext -
+func DialClientConnPlaintext(addr string) (*grpc.ClientConn, error) {
 	config := &nconf.RPCClientConfig{Addr: addr}
 	config.SetDefaultValues()
+	return dialConn(config)
+}
 
-	conn, err := dialConn(config)
+// MustDialClientConnPlaintext -
+func MustDialClientConnPlaintext(addr string) *grpc.ClientConn {
+	conn, err := DialClientConnPlaintext(addr)
 	if err != nil {
 		nlog.Fatalf("fail to dial rpc client connection %s: %s", addr, err)
 	}

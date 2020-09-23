@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"net"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
+	"nfgo.ga/nfgo/nmetrics"
 	"nfgo.ga/nfgo/nutil/ntypes"
 	"nfgo.ga/nfgo/rpc/interceptor"
 
@@ -26,33 +28,42 @@ type Server interface {
 
 // ServerOption -
 type ServerOption struct {
+	MetricsServer            nmetrics.Server
 	UnaryServerInterceptors  []grpc.UnaryServerInterceptor
 	StreamServerInterceptors []grpc.StreamServerInterceptor
 }
 
-func (o *ServerOption) setDefaultValue() {
+func (o *ServerOption) setInterceptors() {
+	unaryInterceptors := []grpc.UnaryServerInterceptor{interceptor.RecoverUnaryServerInterceptor}
+	if o.MetricsServer != nil {
+		unaryInterceptors = append(unaryInterceptors, o.MetricsServer.GrpcMetricsUnaryServerInterceptor())
+	}
+	unaryInterceptors = append(unaryInterceptors,
+		interceptor.RecoverUnaryServerInterceptor,
+		interceptor.MDCBindingUnaryServerInterceptor,
+		interceptor.ValidateUnaryServerInterceptor,
+		interceptor.LoggingUnaryServerInterceptor,
+		interceptor.ErrorHandleUnaryServerInterceptor)
 	if len(o.UnaryServerInterceptors) == 0 {
-		o.UnaryServerInterceptors = []grpc.UnaryServerInterceptor{
-			interceptor.RecoverUnaryServerInterceptor,
-			interceptor.MDCBindingUnaryServerInterceptor,
-			interceptor.ValidateUnaryServerInterceptor,
-			interceptor.LoggingUnaryServerInterceptor,
-			interceptor.ErrorHandleUnaryServerInterceptor,
-		}
+		o.UnaryServerInterceptors = unaryInterceptors
 	} else {
-		intercepts := []grpc.UnaryServerInterceptor{
-			interceptor.RecoverUnaryServerInterceptor,
-		}
-		o.UnaryServerInterceptors = append(intercepts, o.UnaryServerInterceptors...)
+		o.UnaryServerInterceptors = append(unaryInterceptors, o.UnaryServerInterceptors...)
 	}
 
+	streamInterceptors := []grpc.StreamServerInterceptor{interceptor.RecoverStreamServerInterceptor}
+	if o.MetricsServer != nil {
+		streamInterceptors = append(streamInterceptors, o.MetricsServer.GrpcMetricsStramServerInterceptor())
+	}
+	streamInterceptors = append(streamInterceptors,
+		interceptor.MDCBindingStreamServerInterceptor,
+		interceptor.ValidateStreamServerInterceptor,
+		interceptor.LoggingStreamServerInterceptor,
+		interceptor.ErrorHandleStreamServerInterceptor)
+
 	if len(o.StreamServerInterceptors) == 0 {
-		o.StreamServerInterceptors = []grpc.StreamServerInterceptor{}
+		o.StreamServerInterceptors = streamInterceptors
 	} else {
-		intercepts := []grpc.StreamServerInterceptor{
-			interceptor.RecoverStreamServerInterceptor,
-		}
-		o.StreamServerInterceptors = append(intercepts, o.StreamServerInterceptors...)
+		o.StreamServerInterceptors = append(streamInterceptors, o.StreamServerInterceptors...)
 	}
 }
 
@@ -68,7 +79,7 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 	if option == nil {
 		option = &ServerOption{}
 	}
-	option.setDefaultValue()
+	option.setInterceptors()
 
 	opts := []grpc.ServerOption{
 		grpc.MaxRecvMsgSize(int(rpcConfig.MaxRecvMsgSize)),
@@ -77,6 +88,10 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 	}
 
 	grpcServer := grpc.NewServer(opts...)
+
+	if option.MetricsServer != nil {
+		grpc_prometheus.Register(grpcServer)
+	}
 
 	if ntypes.BoolValue(rpcConfig.RegisterHealthServer) {
 		healthServer := health.NewServer()

@@ -63,18 +63,15 @@ func (l *nlogger) IsLevelEnabled(level Level) bool {
 }
 
 func (l *nlogger) WithError(err error) NLogger {
-	l.Entry.WithError(err)
-	return l
+	return &nlogger{l.Entry.WithError(err)}
 }
 
 func (l *nlogger) WithField(key string, value interface{}) NLogger {
-	l.Entry.WithField(key, value)
-	return l
+	return &nlogger{l.Entry.WithField(key, value)}
 }
 
 func (l *nlogger) WithFields(fields Fields) NLogger {
-	l.Entry.WithFields(logrus.Fields(fields))
-	return l
+	return &nlogger{l.Entry.WithFields(logrus.Fields(fields))}
 }
 
 func (l *nlogger) LevelString() string {

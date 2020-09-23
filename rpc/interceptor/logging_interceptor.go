@@ -37,7 +37,53 @@ func LoggingUnaryServerInterceptor(ctx context.Context, req interface{}, info *g
 
 // LoggingStreamServerInterceptor -
 func LoggingStreamServerInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	logger := nlog.Logger(stream.Context())
-	logger.WithField("req", srv).Info()
-	return handler(srv, stream)
+	defer func() {
+		nlog.Logger(stream.Context()).Info("server stream end.")
+	}()
+
+	nlog.Logger(stream.Context()).Info("server stream begin.")
+	s := &serverStreamWrapper{
+		stream: stream,
+		ctx:    stream.Context(),
+		logMsg: true,
+	}
+	return handler(srv, s)
+}
+
+// LoggingUnaryClientInterceptor -
+func LoggingUnaryClientInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
+	defer func() {
+		logger := nlog.Logger(ctx)
+		if err != nil {
+			errLogger := logger.WithError(err)
+			if _, ok := err.(nerrors.BizError); ok {
+				errLogger.Info()
+			} else {
+				errLogger.Error()
+			}
+		} else if logger.IsLevelEnabled(nlog.DebugLevel) {
+			if stringer, ok := reply.(fmt.Stringer); ok {
+				logger.WithField("resp", stringer.String()).Debug()
+			}
+		}
+
+	}()
+	if stringer, ok := req.(fmt.Stringer); ok {
+		nlog.Logger(ctx).WithField("req", stringer.String()).Info()
+	}
+	return invoker(ctx, method, req, reply, cc, opts...)
+}
+
+// LoggingStreamClientInterceptor -
+func LoggingStreamClientInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+
+	nlog.Logger(ctx).Info("client stream begin.")
+	stream, err := streamer(ctx, desc, cc, method, opts...)
+	if err == nil {
+		stream = &clientStreamWrapper{
+			stream: stream,
+			logMsg: true,
+		}
+	}
+	return stream, err
 }

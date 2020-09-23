@@ -12,18 +12,18 @@ import (
 // ErrorHandleUnaryServerInterceptor -
 func ErrorHandleUnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	resp, err = handler(ctx, req)
-	err = handleError(ctx, err)
+	err = handleServerError(ctx, err)
 	return
 }
 
 // ErrorHandleStreamServerInterceptor -
 func ErrorHandleStreamServerInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	err := handler(srv, stream)
-	err = handleError(stream.Context(), err)
+	err = handleServerError(stream.Context(), err)
 	return err
 }
 
-func handleError(ctx context.Context, err error) error {
+func handleServerError(ctx context.Context, err error) error {
 	if err != nil {
 		if bizErr, ok := err.(nerrors.BizError); ok {
 			return grpc.Errorf(codes.Code(bizErr.Code()), bizErr.Msg())
