@@ -7,22 +7,20 @@ import (
 	"nfgo.ga/nfgo/nutil/ntypes"
 )
 
-func setDefaultValues(configs ...interface{ setDefaultValues() error }) error {
+func setDefaultValues(configs ...interface{ SetDefaultValues() }) {
 	for _, config := range configs {
 		if nutil.IsNotNil(config) {
-			if err := config.setDefaultValues(); err != nil {
-				return err
-			}
+			config.SetDefaultValues()
 		}
 	}
-	return nil
 }
 
-func (conf *Config) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *Config) SetDefaultValues() {
 	if conf.GraceTermination == nil {
 		conf.GraceTermination = &GraceTerminationConfig{}
 	}
-	return setDefaultValues(
+	setDefaultValues(
 		conf.DB,
 		conf.Redis,
 		conf.Web,
@@ -34,7 +32,8 @@ func (conf *Config) setDefaultValues() error {
 	)
 }
 
-func (conf *DbConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *DbConfig) SetDefaultValues() {
 	if conf.MaxOpen == 0 {
 		conf.MaxOpen = 2
 	}
@@ -47,10 +46,10 @@ func (conf *DbConfig) setDefaultValues() error {
 	if conf.Charset == "" {
 		conf.Charset = "utf8mb4"
 	}
-	return nil
 }
 
-func (conf *RedisConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *RedisConfig) SetDefaultValues() {
 	if conf.MaxActive == 0 {
 		conf.MaxActive = 5
 	}
@@ -60,10 +59,10 @@ func (conf *RedisConfig) setDefaultValues() error {
 	if conf.MaxConnLifetime == 0 {
 		conf.MaxConnLifetime = 30 * time.Minute
 	}
-	return nil
 }
 
-func (conf *WebConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *WebConfig) SetDefaultValues() {
 	if conf.Host == "" {
 		conf.Host = "0.0.0.0"
 	}
@@ -73,10 +72,10 @@ func (conf *WebConfig) setDefaultValues() error {
 	if conf.MaxMultipartMemory == 0 {
 		conf.MaxMultipartMemory = 50 << 20 // 50MiB
 	}
-	return nil
 }
 
-func (conf *RPCConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *RPCConfig) SetDefaultValues() {
 	if conf.Host == "" {
 		conf.Host = "0.0.0.0"
 	}
@@ -94,15 +93,13 @@ func (conf *RPCConfig) setDefaultValues() error {
 	}
 	for _, clientConf := range conf.Clients {
 		if clientConf != nil {
-			if err := clientConf.setDefaultValues(); err != nil {
-				return err
-			}
+			clientConf.SetDefaultValues()
 		}
 	}
-	return nil
 }
 
-func (conf *RPCClientConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *RPCClientConfig) SetDefaultValues() {
 	if conf.MaxCallSendMsgSize == 0 {
 		conf.MaxCallSendMsgSize = 50 << 20 // 50MiB
 	}
@@ -112,20 +109,20 @@ func (conf *RPCClientConfig) setDefaultValues() error {
 	if conf.Plaintext == nil {
 		conf.Plaintext = ntypes.Bool(true)
 	}
-	return nil
 }
 
-func (conf *SecurityConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *SecurityConfig) SetDefaultValues() {
 	if conf.TimeWindow == 0 {
 		conf.TimeWindow = 30 * time.Minute
 	}
 	if conf.SignKeyLifeTime == 0 {
 		conf.SignKeyLifeTime = 365 * 24 * time.Hour
 	}
-	return nil
 }
 
-func (conf *MetricsConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *MetricsConfig) SetDefaultValues() {
 	if conf.Host == "" {
 		conf.Host = "0.0.0.0"
 	}
@@ -135,19 +132,18 @@ func (conf *MetricsConfig) setDefaultValues() error {
 	if conf.MetricsPath == "" {
 		conf.MetricsPath = "/metrics"
 	}
-	return nil
 }
 
-func (conf *GraceTerminationConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *GraceTerminationConfig) SetDefaultValues() {
 	if conf.GraceTerminationPeriod == 0 {
 		conf.GraceTerminationPeriod = 10 * time.Second
 	}
-	return nil
 }
 
-func (conf *CronConfig) setDefaultValues() error {
+// SetDefaultValues -
+func (conf *CronConfig) SetDefaultValues() {
 	if conf.SkipIfStillRunning == nil {
 		conf.SkipIfStillRunning = ntypes.Bool(true)
 	}
-	return nil
 }

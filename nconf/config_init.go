@@ -34,9 +34,7 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 	if err = yaml.Unmarshal(data, config); err != nil {
 		log.Fatal(err)
 	}
-	if err := config.setDefaultValues(); err != nil {
-		log.Fatal(err)
-	}
+	config.SetDefaultValues()
 
 	// custom config
 	if customConfig != nil {

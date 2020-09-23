@@ -91,3 +91,15 @@ func dialConn(config *nconf.RPCClientConfig) (*grpc.ClientConn, error) {
 	// Dial connection
 	return grpc.Dial(config.Addr, dialOptions...)
 }
+
+// MustDialClientConnPlaintext -
+func MustDialClientConnPlaintext(addr string) *grpc.ClientConn {
+	config := &nconf.RPCClientConfig{Addr: addr}
+	config.SetDefaultValues()
+
+	conn, err := dialConn(config)
+	if err != nil {
+		nlog.Fatalf("fail to dial rpc client connection %s: %s", addr, err)
+	}
+	return conn
+}

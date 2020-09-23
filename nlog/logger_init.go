@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	entry *logrus.Entry
+	entry *logrus.Entry = newDefaultLogrusEnry()
 )
 
 // InitLogger -
@@ -114,4 +114,16 @@ func setFormatter(logEntry *logrus.Entry, logConf *nconf.LogConfig) {
 		}
 	}
 	logEntry.Logger.SetFormatter(formater)
+}
+
+func newDefaultLogrusEnry() *logrus.Entry {
+	logger := logrus.New()
+	logger.SetFormatter(
+		&logrus.TextFormatter{
+			DisableColors:   true,
+			TimestampFormat: "2006-01-02T15:04:05.000Z07:00",
+		},
+	)
+	entry := logrus.NewEntry(logger)
+	return entry
 }
