@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/web"
 )
 
 func (s *server) regitserWebCollector(config *nconf.Config) error {
@@ -67,8 +67,8 @@ func (m *webMetrics) Collect(ch chan<- prometheus.Metric) {
 	m.respSizeBytes.Collect(ch)
 }
 
-func (s *server) WebMetricsMiddleware() web.HandlerFunc {
-	return func(c *web.Context) {
+func (s *server) WebMetricsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
 		statusCode := strconv.Itoa(c.Writer.Status())

@@ -14,6 +14,7 @@ import (
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
+	"nfgo.ga/nfgo/nmetrics"
 )
 
 // Server -
@@ -25,22 +26,22 @@ type Server interface {
 
 // ServerOption -
 type ServerOption struct {
-	Middlewares []HandlerFunc
+	MetricsServer nmetrics.Server
+	Middlewares   []HandlerFunc
 }
 
 func (o *ServerOption) setMiddlewaresToEngine(engine *gin.Engine) {
-	if len(o.Middlewares) == 0 {
-		engine.Use(
-			gin.Recovery(),
-			BindMDC().WrapHandler(),
-			Logging().WrapHandler(),
-		)
-	} else {
-		engine.Use(gin.Recovery())
+	middleWares := []gin.HandlerFunc{gin.Recovery()}
+	if o.MetricsServer != nil {
+		middleWares = append(middleWares, o.MetricsServer.WebMetricsMiddleware())
+	}
+	middleWares = append(middleWares, BindMDC().WrapHandler(), Logging().WrapHandler())
+	if len(o.Middlewares) > 0 {
 		for _, m := range o.Middlewares {
-			engine.Use(m.WrapHandler())
+			middleWares = append(middleWares, m.WrapHandler())
 		}
 	}
+	engine.Use(middleWares...)
 }
 
 type server struct {

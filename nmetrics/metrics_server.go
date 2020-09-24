@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -14,7 +15,6 @@ import (
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/web"
 )
 
 // Server -
@@ -29,7 +29,7 @@ type Server interface {
 
 	GrpcMetricsStramServerInterceptor() func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
 
-	WebMetricsMiddleware() web.HandlerFunc
+	WebMetricsMiddleware() gin.HandlerFunc
 }
 
 // ServerOption -
