@@ -24,6 +24,7 @@ func ValidateStreamClientInterceptor(ctx context.Context, desc *grpc.StreamDesc,
 		stream = &clientStreamWrapper{
 			stream:      stream,
 			validateMsg: true,
+			method:      method,
 		}
 	}
 	return stream, err

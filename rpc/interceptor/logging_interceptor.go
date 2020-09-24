@@ -23,14 +23,14 @@ func LoggingUnaryServerInterceptor(ctx context.Context, req interface{}, info *g
 			}
 		} else if logger.IsLevelEnabled(nlog.DebugLevel) {
 			if stringer, ok := resp.(fmt.Stringer); ok {
-				logger.WithField("resp", stringer.String()).Debug()
+				logger.WithField(fieldNameResp, stringer.String()).Debug()
 			}
 		}
 
 	}()
 
 	if stringer, ok := req.(fmt.Stringer); ok {
-		nlog.Logger(ctx).WithField("req", stringer.String()).Info()
+		nlog.Logger(ctx).WithField(fieldNameReq, stringer.String()).Info()
 	}
 	return handler(ctx, req)
 }
@@ -63,13 +63,19 @@ func LoggingUnaryClientInterceptor(ctx context.Context, method string, req inter
 			}
 		} else if logger.IsLevelEnabled(nlog.DebugLevel) {
 			if stringer, ok := reply.(fmt.Stringer); ok {
-				logger.WithField("resp", stringer.String()).Debug()
+				logger.WithFields(nlog.Fields{
+					fieldNameRPCCall: method,
+					fieldNameResp:    stringer.String(),
+				}).Debug()
 			}
 		}
 
 	}()
 	if stringer, ok := req.(fmt.Stringer); ok {
-		nlog.Logger(ctx).WithField("req", stringer.String()).Info()
+		nlog.Logger(ctx).WithFields(nlog.Fields{
+			fieldNameReq:     stringer.String(),
+			fieldNameRPCCall: method,
+		}).Info()
 	}
 	return invoker(ctx, method, req, reply, cc, opts...)
 }
@@ -77,12 +83,13 @@ func LoggingUnaryClientInterceptor(ctx context.Context, method string, req inter
 // LoggingStreamClientInterceptor -
 func LoggingStreamClientInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
 
-	nlog.Logger(ctx).Info("client stream begin.")
+	nlog.Logger(ctx).WithField(fieldNameRPCCall, method).Info("client stream begin.")
 	stream, err := streamer(ctx, desc, cc, method, opts...)
 	if err == nil {
 		stream = &clientStreamWrapper{
 			stream: stream,
 			logMsg: true,
+			method: method,
 		}
 	}
 	return stream, err

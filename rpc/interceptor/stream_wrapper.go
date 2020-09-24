@@ -11,6 +11,12 @@ import (
 	"nfgo.ga/nfgo/nlog"
 )
 
+const (
+	fieldNameReq     = "req"
+	fieldNameResp    = "resp"
+	fieldNameRPCCall = "rpcCall"
+)
+
 // serverStreamWrapper -
 type serverStreamWrapper struct {
 	stream      grpc.ServerStream
@@ -49,7 +55,7 @@ func (s *serverStreamWrapper) RecvMsg(m interface{}) error {
 
 	if s.logMsg {
 		if stringer, ok := m.(fmt.Stringer); ok {
-			nlog.Logger(s.ctx).WithField("req", stringer.String()).Info("server stream recv msg.")
+			nlog.Logger(s.ctx).WithField(fieldNameReq, stringer.String()).Info("server stream recv msg.")
 		}
 	}
 
@@ -69,6 +75,7 @@ type clientStreamWrapper struct {
 	stream      grpc.ClientStream
 	logMsg      bool
 	validateMsg bool
+	method      string
 }
 
 func (s *clientStreamWrapper) Header() (metadata.MD, error) {
@@ -90,7 +97,10 @@ func (s *clientStreamWrapper) Context() context.Context {
 func (s *clientStreamWrapper) SendMsg(m interface{}) error {
 	if s.logMsg {
 		if stringer, ok := m.(fmt.Stringer); ok {
-			nlog.Logger(s.Context()).WithField("req", stringer.String()).Info("clent stream send msg.")
+			nlog.Logger(s.Context()).WithFields(nlog.Fields{
+				fieldNameReq:     stringer.String(),
+				fieldNameRPCCall: s.method,
+			}).Info("clent stream send msg.")
 		}
 	}
 	if s.validateMsg {
@@ -106,7 +116,10 @@ func (s *clientStreamWrapper) SendMsg(m interface{}) error {
 func (s *clientStreamWrapper) RecvMsg(m interface{}) error {
 	if s.logMsg {
 		if stringer, ok := m.(fmt.Stringer); ok {
-			nlog.Logger(s.Context()).WithField("resp", stringer.String()).Info("client stream recv msg.")
+			nlog.Logger(s.Context()).WithFields(nlog.Fields{
+				fieldNameResp:    stringer.String(),
+				fieldNameRPCCall: s.method,
+			}).Info("client stream recv msg.")
 		}
 		err := s.stream.RecvMsg(m)
 		if err == io.EOF {
