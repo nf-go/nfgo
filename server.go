@@ -1,66 +1,60 @@
-package ngrace
+package nfgo
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
+	"nfgo.ga/nfgo/nutil/graceful"
 )
 
-// GraceTerminatedServer -
-type GraceTerminatedServer interface {
+// Server -
+type Server interface {
 	MustServe()
 	RegisterOnShutdown(f func())
 }
 
-// Server -
-type Server interface {
-	Serve() error
-	MustServe()
-	Shutdown(ctx context.Context) error
-}
-
-// NewGraceTerminatedServer -
-func NewGraceTerminatedServer(config *nconf.Config, servers ...Server) (GraceTerminatedServer, error) {
+// NewServer -
+func NewServer(config *nconf.Config, servers ...graceful.ShutdownServer) (Server, error) {
 	if config == nil {
 		return nil, errors.New("config is nill")
 	}
-	return &graceTerminatedServer{
+	return &nfgoServer{
 		servers: servers,
 		config:  config,
 	}, nil
 }
 
-// MustNewGraceTerminatedServer -
-func MustNewGraceTerminatedServer(config *nconf.Config, servers ...Server) GraceTerminatedServer {
-	server, err := NewGraceTerminatedServer(config, servers...)
+// MustNewServer -
+func MustNewServer(config *nconf.Config, servers ...graceful.ShutdownServer) Server {
+	server, err := NewServer(config, servers...)
 	if err != nil {
 		nlog.Fatal("fail to init grace termination server: ", err)
 	}
 	return server
 }
 
-type graceTerminatedServer struct {
+type nfgoServer struct {
 	config     *nconf.Config
-	servers    []Server
+	servers    []graceful.ShutdownServer
 	onShutdown []func()
 	mu         sync.Mutex
 }
 
-func (s *graceTerminatedServer) RegisterOnShutdown(f func()) {
+func (s *nfgoServer) RegisterOnShutdown(f func()) {
 	s.mu.Lock()
 	s.onShutdown = append(s.onShutdown, f)
 	s.mu.Unlock()
 }
 
 // Serve -
-func (s *graceTerminatedServer) MustServe() {
+func (s *nfgoServer) MustServe() {
 	for _, server := range s.servers {
 		go server.MustServe()
 	}
@@ -108,10 +102,10 @@ func (e *gracefulErrs) isNil() bool {
 }
 
 func (e *gracefulErrs) Error() string {
-	var buf bytes.Buffer
+	var sb strings.Builder
 	for _, err := range e.errs {
-		buf.WriteString(err.Error())
-		buf.WriteString(". ")
+		sb.WriteString(err.Error())
+		sb.WriteString(". ")
 	}
-	return buf.String()
+	return sb.String()
 }

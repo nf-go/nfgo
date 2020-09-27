@@ -12,14 +12,15 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nmetrics"
+	"nfgo.ga/nfgo/nutil/graceful"
 )
 
 // Server -
 type Server interface {
-	ngrace.Server
+	graceful.ShutdownServer
+
 	RegisterOnShutdown(f func())
 	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
 }

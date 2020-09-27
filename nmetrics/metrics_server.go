@@ -13,13 +13,13 @@ import (
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
+	"nfgo.ga/nfgo/nutil/graceful"
 )
 
 // Server -
 type Server interface {
-	ngrace.Server
+	graceful.ShutdownServer
 
 	RegisterCollectors(collectors ...prometheus.Collector) error
 

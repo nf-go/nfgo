@@ -8,9 +8,9 @@ import (
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nmetrics"
+	"nfgo.ga/nfgo/nutil/graceful"
 	"nfgo.ga/nfgo/nutil/ntypes"
 	"nfgo.ga/nfgo/rpc/interceptor"
 
@@ -22,7 +22,8 @@ import (
 
 // Server -
 type Server interface {
-	ngrace.Server
+	graceful.ShutdownServer
+
 	GRPCServer() *grpc.Server
 }
 

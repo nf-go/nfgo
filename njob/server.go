@@ -7,14 +7,14 @@ import (
 
 	"github.com/robfig/cron/v3"
 	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/ngrace"
 	"nfgo.ga/nfgo/nlog"
+	"nfgo.ga/nfgo/nutil/graceful"
 	"nfgo.ga/nfgo/nutil/ntypes"
 )
 
 // Server -
 type Server interface {
-	ngrace.Server
+	graceful.ShutdownServer
 }
 
 // ServerOption -
