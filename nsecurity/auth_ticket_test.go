@@ -2,6 +2,8 @@ package nsecurity
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthTicketVerifySignature(t *testing.T) {
@@ -20,12 +22,8 @@ func TestAuthTicketVerifySignature(t *testing.T) {
 		Token:     token,
 	}
 
-	if !ticket.VerifySignature(signKey) {
-		t.Fatal("error signature")
-	}
+	assert.True(t, ticket.VerifySignature(signKey), "the signature should be valid")
 
-	if err := ticket.VerifyToken("VoCra8#GEBAbRl*+vos9UF@??gi8Oy"); err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, ticket.VerifyToken("VoCra8#GEBAbRl*+vos9UF@??gi8Oy"))
 
 }

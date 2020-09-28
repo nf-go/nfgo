@@ -1,12 +1,14 @@
 package ncontext
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestContextOthers(t *testing.T) {
 	m := NewMDC()
 	v := m.Other("notexist")
-	if v != nil {
-		t.FailNow()
-	}
+	assert.NotNil(t, v)
 	t.Log(v)
 }

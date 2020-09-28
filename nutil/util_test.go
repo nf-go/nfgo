@@ -2,23 +2,21 @@ package nutil
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSha256(t *testing.T) {
 	plaint := "qwer1234JSQotTd2s3"
 	hashed := Sha256(plaint)
-	if hashed != "003b12dfe2c657c572f3496a63af8e2250f465e96aa0ebfea8428c82e0b10ba0" {
-		t.FailNow()
-	}
+	assert.Equal(t, "003b12dfe2c657c572f3496a63af8e2250f465e96aa0ebfea8428c82e0b10ba0", hashed)
 	t.Log(len(hashed))
 }
 
 func TestRandomString(t *testing.T) {
 	str := RandString(6)
 	t.Log(str)
-	if len(str) != 6 {
-		t.FailNow()
-	}
+	assert.Equal(t, 6, len(str))
 }
 
 func TestIsNil(t *testing.T) {
