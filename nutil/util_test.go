@@ -20,3 +20,40 @@ func TestRandomString(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestIsNil(t *testing.T) {
+	var ch chan int
+	if !IsNil(ch) {
+		t.Fatal()
+	}
+
+	var f func() = nil
+	if !IsNil(f) {
+		t.Fatal()
+	}
+
+	var m map[string]int = nil
+	if !IsNil(m) {
+		t.Fatal()
+	}
+
+	var s []int = nil
+	if !IsNil(s) {
+		t.Fatal(s)
+	}
+
+	var obj interface{} = (*int)(nil)
+	if !IsNil(obj) {
+		t.Fatal()
+	}
+
+	var obj2 interface{} = nil
+	if !IsNil(obj2) {
+		t.Fatal()
+	}
+
+	if IsNil("") || IsNil(1) {
+		t.Fatal()
+	}
+
+}

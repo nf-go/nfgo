@@ -49,10 +49,11 @@ func UUID() (string, error) {
 // IsNil -
 func IsNil(i interface{}) bool {
 	v := reflect.ValueOf(i)
-	if v.Kind() == reflect.Ptr {
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Chan, reflect.Func, reflect.Map, reflect.Slice, reflect.Interface, reflect.UnsafePointer:
 		return v.IsNil()
 	}
-	return false
+	return i == nil
 }
 
 // IsNotNil -
