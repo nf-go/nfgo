@@ -3,32 +3,11 @@ package nlog
 import (
 	"context"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/ncontext"
 )
-
-const (
-	// PanicLevel level, highest level of severity.
-	PanicLevel Level = Level(logrus.PanicLevel)
-	// FatalLevel level.
-	FatalLevel = Level(logrus.FatalLevel)
-	// ErrorLevel level.
-	ErrorLevel = Level(logrus.ErrorLevel)
-	// WarnLevel level.
-	WarnLevel = Level(logrus.WarnLevel)
-	// InfoLevel level.
-	InfoLevel = Level(logrus.InfoLevel)
-	// DebugLevel level.
-	DebugLevel = Level(logrus.DebugLevel)
-	// TraceLevel level.
-	TraceLevel = Level(logrus.TraceLevel)
-)
-
-// Level -
-type Level logrus.Level
-
-// Fields -
-type Fields logrus.Fields
 
 // NLogger -
 type NLogger interface {
@@ -38,14 +17,12 @@ type NLogger interface {
 	WithField(key string, value interface{}) NLogger
 	WithFields(fields Fields) NLogger
 
-	Tracef(format string, args ...interface{})
 	Debugf(format string, args ...interface{})
 	Infof(format string, args ...interface{})
 	Warnf(format string, args ...interface{})
 	Errorf(format string, args ...interface{})
 	Fatalf(format string, args ...interface{})
 	Panicf(format string, args ...interface{})
-	Trace(args ...interface{})
 	Debug(args ...interface{})
 	Info(args ...interface{})
 	Warn(args ...interface{})
@@ -54,28 +31,28 @@ type NLogger interface {
 	Panic(args ...interface{})
 }
 
-type nlogger struct {
-	*logrus.Entry
-}
+var (
+	logger    *nlogger = newDefaultLogger()
+	pkgLogger *nlogger = newPkgLogger(logger)
+)
 
-func (l *nlogger) IsLevelEnabled(level Level) bool {
-	return l.Entry.Logger.IsLevelEnabled(logrus.Level(level))
-}
+// InitLogger -
+func InitLogger(config *nconf.Config) {
+	fields := NewFields(
+		"app", config.App.Name,
+		"profile", config.App.Profile,
+	)
+	zapConfig := newDefaultZapConfig()
+	zapConfig.InitialFields = fields
 
-func (l *nlogger) WithError(err error) NLogger {
-	return &nlogger{l.Entry.WithError(err)}
-}
+	logConf := config.Log
+	setOutput(zapConfig, config)
+	setFormatter(zapConfig, logConf)
+	setLevel(zapConfig, logConf)
 
-func (l *nlogger) WithField(key string, value interface{}) NLogger {
-	return &nlogger{l.Entry.WithField(key, value)}
-}
-
-func (l *nlogger) WithFields(fields Fields) NLogger {
-	return &nlogger{l.Entry.WithFields(logrus.Fields(fields))}
-}
-
-func (l *nlogger) LevelString() string {
-	return l.Entry.Logger.Level.String()
+	zapLogger := mustNewZapLogger(zapConfig)
+	logger = &nlogger{zapLogger, zapConfig.Level.Level()}
+	pkgLogger = newPkgLogger(logger)
 }
 
 // Logger -
@@ -83,92 +60,124 @@ func Logger(ctx context.Context) NLogger {
 	if ctx != nil {
 		mdc, _ := ncontext.CurrentMDC(ctx)
 		if mdc != nil {
-			var fields = logrus.Fields{}
-			putNotEmptyVal(fields, "traceID", mdc.TraceID())
-			putNotEmptyVal(fields, "subjectID", mdc.SubjectID())
-			putNotEmptyVal(fields, "rpcName", mdc.RPCName())
-			putNotEmptyVal(fields, "apiName", mdc.APIName())
-			putNotEmptyVal(fields, "clientIP", mdc.ClientIP())
-			putNotEmptyVal(fields, "clientType", mdc.ClientType())
-			return &nlogger{entry.WithFields(fields)}
+			fields := NewFields(
+				"traceID", mdc.TraceID(),
+				"subjectID", mdc.SubjectID(),
+				"rpcName", mdc.RPCName(),
+				"apiName", mdc.APIName(),
+				"clientIP", mdc.ClientIP(),
+				"clientType", mdc.ClientType(),
+			)
+			return logger.WithFields(fields)
 		}
 	}
-	return &nlogger{entry}
+	return logger
+}
+
+type nlogger struct {
+	*zap.SugaredLogger
+	zapcore.Level
+}
+
+func newDefaultLogger() *nlogger {
+	return &nlogger{
+		mustNewZapLogger(newDefaultZapConfig()),
+		zapcore.InfoLevel,
+	}
+}
+
+func newPkgLogger(logger *nlogger) *nlogger {
+	return &nlogger{
+		logger.SugaredLogger.Desugar().WithOptions(zap.AddCallerSkip(1)).Sugar(),
+		logger.Level,
+	}
+}
+
+func (l *nlogger) IsLevelEnabled(level Level) bool {
+	return l.Level.Enabled(level.unWrap())
+}
+
+func (l *nlogger) WithError(err error) NLogger {
+	return &nlogger{l.With("error", err), l.Level}
+}
+
+func (l *nlogger) WithField(key string, value interface{}) NLogger {
+	return &nlogger{l.With(key, value), l.Level}
+}
+
+func (l *nlogger) WithFields(fields Fields) NLogger {
+	args := make([]interface{}, 0, len(fields))
+	for key, value := range fields {
+		args = append(args, key, value)
+	}
+	return &nlogger{l.With(args...), l.Level}
+}
+
+func (l *nlogger) LevelString() string {
+	return Level(l.Level).String()
 }
 
 // IsLevelEnabled -
 func IsLevelEnabled(level Level) bool {
-	return entry.Logger.IsLevelEnabled(logrus.Level(level))
-}
-
-// Tracef -
-func Tracef(format string, args ...interface{}) {
-	entry.Logf(logrus.TraceLevel, format, args...)
+	return pkgLogger.Level.Enabled(level.unWrap())
 }
 
 // Debugf -
 func Debugf(format string, args ...interface{}) {
-	entry.Logf(logrus.DebugLevel, format, args...)
+	pkgLogger.Debugf(format, args...)
 }
 
 // Infof -
 func Infof(format string, args ...interface{}) {
-	entry.Logf(logrus.InfoLevel, format, args...)
+	pkgLogger.Infof(format, args...)
 }
 
 // Warnf -
 func Warnf(format string, args ...interface{}) {
-	entry.Logf(logrus.WarnLevel, format, args...)
+	pkgLogger.Warnf(format, args...)
 }
 
 // Errorf -
 func Errorf(format string, args ...interface{}) {
-	entry.Logf(logrus.ErrorLevel, format, args...)
+	pkgLogger.Errorf(format, args...)
 }
 
 // Fatalf -
 func Fatalf(format string, args ...interface{}) {
-	entry.Logf(logrus.FatalLevel, format, args...)
-	entry.Logger.Exit(1)
+	pkgLogger.Fatalf(format, args...)
 }
 
 // Panicf -
 func Panicf(format string, args ...interface{}) {
-	entry.Logf(logrus.PanicLevel, format, args...)
-}
-
-// Trace -
-func Trace(args ...interface{}) {
-	entry.Log(logrus.TraceLevel, args...)
+	pkgLogger.Panicf(format, args...)
 }
 
 // Debug -
 func Debug(args ...interface{}) {
-	entry.Log(logrus.DebugLevel, args...)
+	pkgLogger.Debug(args...)
 }
 
 // Info -
 func Info(args ...interface{}) {
-	entry.Log(logrus.InfoLevel, args...)
+	pkgLogger.Info(args...)
 }
 
 // Warn -
 func Warn(args ...interface{}) {
-	entry.Log(logrus.WarnLevel, args...)
+	pkgLogger.Warn(args...)
 }
 
 // Error -
 func Error(args ...interface{}) {
-	entry.Log(logrus.ErrorLevel, args...)
+	pkgLogger.Error(args...)
 }
 
 // Fatal -
 func Fatal(args ...interface{}) {
-	entry.Log(logrus.FatalLevel, args...)
-	entry.Logger.Exit(1)
+	pkgLogger.Fatal(args...)
 }
 
 // Panic -
 func Panic(args ...interface{}) {
-	entry.Log(logrus.PanicLevel, args...)
+	pkgLogger.Panic(args...)
 }

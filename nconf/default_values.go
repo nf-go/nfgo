@@ -20,6 +20,12 @@ func (conf *Config) SetDefaultValues() {
 	if conf.GraceTermination == nil {
 		conf.GraceTermination = &GraceTerminationConfig{}
 	}
+	if conf.Log == nil {
+		conf.Log = &LogConfig{
+			Level:  "info",
+			Format: "json",
+		}
+	}
 	setDefaultValues(
 		conf.DB,
 		conf.Redis,

@@ -64,6 +64,7 @@ type LogConfig struct {
 	Level           string `yaml:"level"`
 	Format          string `yaml:"format"`
 	PrettyPrint     bool   `yaml:"prettyPrint"`
+	CallerPrint     bool   `yaml:"callerPrint"`
 	TimestampFormat string `yaml:"timestampFormat"`
 	LogPath         string `yaml:"logPath"`
 	LogFilename     string `yaml:"logFilename"`
