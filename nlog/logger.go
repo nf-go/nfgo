@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/ncontext"
 )
@@ -51,7 +50,7 @@ func InitLogger(config *nconf.Config) {
 	setLevel(zapConfig, logConf)
 
 	zapLogger := mustNewZapLogger(zapConfig)
-	logger = &nlogger{zapLogger, zapConfig.Level.Level()}
+	logger = &nlogger{zapLogger, zapConfig}
 	pkgLogger = newPkgLogger(logger)
 }
 
@@ -76,33 +75,35 @@ func Logger(ctx context.Context) NLogger {
 
 type nlogger struct {
 	*zap.SugaredLogger
-	zapcore.Level
+	*zap.Config
 }
 
 func newDefaultLogger() *nlogger {
+	zapConfig := newDefaultZapConfig()
 	return &nlogger{
-		mustNewZapLogger(newDefaultZapConfig()),
-		zapcore.InfoLevel,
+		mustNewZapLogger(zapConfig),
+		zapConfig,
 	}
 }
 
 func newPkgLogger(logger *nlogger) *nlogger {
 	return &nlogger{
 		logger.SugaredLogger.Desugar().WithOptions(zap.AddCallerSkip(1)).Sugar(),
-		logger.Level,
+		logger.Config,
 	}
 }
 
 func (l *nlogger) IsLevelEnabled(level Level) bool {
-	return l.Level.Enabled(level.unWrap())
+	l.Sync()
+	return l.Config.Level.Enabled(level.unWrap())
 }
 
 func (l *nlogger) WithError(err error) NLogger {
-	return &nlogger{l.With("error", err), l.Level}
+	return &nlogger{l.With("error", err), l.Config}
 }
 
 func (l *nlogger) WithField(key string, value interface{}) NLogger {
-	return &nlogger{l.With(key, value), l.Level}
+	return &nlogger{l.With(key, value), l.Config}
 }
 
 func (l *nlogger) WithFields(fields Fields) NLogger {
@@ -110,16 +111,16 @@ func (l *nlogger) WithFields(fields Fields) NLogger {
 	for key, value := range fields {
 		args = append(args, key, value)
 	}
-	return &nlogger{l.With(args...), l.Level}
+	return &nlogger{l.With(args...), l.Config}
 }
 
 func (l *nlogger) LevelString() string {
-	return Level(l.Level).String()
+	return l.Config.Level.Level().String()
 }
 
 // IsLevelEnabled -
 func IsLevelEnabled(level Level) bool {
-	return pkgLogger.Level.Enabled(level.unWrap())
+	return pkgLogger.Config.Level.Enabled(level.unWrap())
 }
 
 // Debugf -
@@ -180,4 +181,16 @@ func Fatal(args ...interface{}) {
 // Panic -
 func Panic(args ...interface{}) {
 	pkgLogger.Panic(args...)
+}
+
+// SetLevel - alters the logging level.
+// It lets you safely change the log level of a tree of loggers (the root logger and any children created by adding context) at runtime.
+func SetLevel(level Level) {
+	pkgLogger.Config.Level.SetLevel(level.unWrap())
+}
+
+// Sync - Sync calls the underlying Core's Sync method, flushing any buffered log entries.
+// Applications should take care to call Sync before exiting.
+func Sync() error {
+	return pkgLogger.SugaredLogger.Sync()
 }
