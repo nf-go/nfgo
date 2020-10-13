@@ -21,7 +21,6 @@ import (
 type Server interface {
 	graceful.ShutdownServer
 
-	RegisterOnShutdown(f func())
 	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
 }
 
@@ -71,10 +70,6 @@ func (s *server) MustServe() {
 
 func (s *server) Shutdown(ctx context.Context) error {
 	return s.httpServer.Shutdown(ctx)
-}
-
-func (s *server) RegisterOnShutdown(f func()) {
-	s.httpServer.RegisterOnShutdown(f)
 }
 
 func (s *server) Group(relativePath string, handlers ...HandlerFunc) RouterGroup {

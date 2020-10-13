@@ -5,10 +5,10 @@ import (
 	"errors"
 	"os"
 	"os/signal"
-	"strings"
 	"sync"
 	"syscall"
 
+	"go.uber.org/multierr"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/graceful"
@@ -17,7 +17,7 @@ import (
 // Server -
 type Server interface {
 	MustServe()
-	RegisterOnShutdown(f func())
+	RegisterOnShutdown(f func() error)
 }
 
 // NewServer -
@@ -43,11 +43,11 @@ func MustNewServer(config *nconf.Config, servers ...graceful.ShutdownServer) Ser
 type nfgoServer struct {
 	config     *nconf.Config
 	servers    []graceful.ShutdownServer
-	onShutdown []func()
+	onShutdown []func() error
 	mu         sync.Mutex
 }
 
-func (s *nfgoServer) RegisterOnShutdown(f func()) {
+func (s *nfgoServer) RegisterOnShutdown(f func() error) {
 	s.mu.Lock()
 	s.onShutdown = append(s.onShutdown, f)
 	s.mu.Unlock()
@@ -73,39 +73,16 @@ func (s *nfgoServer) MustServe() {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	var errs gracefulErrs
+	var err error
 	for _, server := range s.servers {
-		if err := server.Shutdown(ctx); err != nil {
-			errs.addError(err)
-		}
+		err = multierr.Append(err, server.Shutdown(ctx))
 	}
 	for _, f := range s.onShutdown {
-		f()
+		err = multierr.Append(err, f())
 	}
-	if errs.isNil() {
+	if err != nil {
 		nlog.Info("the server is stopped normally.")
 	} else {
-		nlog.Error("the server is forced to stop.", errs)
+		nlog.Error("the server is forced to stop.", err)
 	}
-}
-
-type gracefulErrs struct {
-	errs []error
-}
-
-func (e *gracefulErrs) addError(err error) {
-	e.errs = append(e.errs, err)
-}
-
-func (e *gracefulErrs) isNil() bool {
-	return len(e.errs) == 0
-}
-
-func (e *gracefulErrs) Error() string {
-	var sb strings.Builder
-	for _, err := range e.errs {
-		sb.WriteString(err.Error())
-		sb.WriteString(". ")
-	}
-	return sb.String()
 }

@@ -15,6 +15,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.2.0
+	go.uber.org/multierr v1.6.0
 	go.uber.org/zap v1.16.0
 	google.golang.org/grpc v1.32.0
 	gopkg.in/yaml.v2 v2.3.0
