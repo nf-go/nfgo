@@ -8,6 +8,31 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// MustNewConfig -
+func MustNewConfig(bytes []byte) *Config {
+	return MustNewConfigCustom(bytes, nil)
+}
+
+// MustNewConfigCustom  -
+func MustNewConfigCustom(bytes []byte, customConfig interface{ SetConfig(config *Config) }) *Config {
+	config := &Config{}
+	if err := yaml.Unmarshal(bytes, config); err != nil {
+		log.Fatal(err)
+	}
+	config.SetDefaultValues()
+
+	// custom config
+	if customConfig != nil {
+		if err := yaml.Unmarshal(bytes, customConfig); err != nil {
+			log.Fatal(err)
+		} else {
+			customConfig.SetConfig(config)
+		}
+	}
+
+	return config
+}
+
 // MustLoadConfig -
 func MustLoadConfig(confPath string) *Config {
 	return MustLoadConfigCustom(confPath, nil)
@@ -30,20 +55,5 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 		log.Fatal(err)
 	}
 
-	config := &Config{}
-	if err = yaml.Unmarshal(data, config); err != nil {
-		log.Fatal(err)
-	}
-	config.SetDefaultValues()
-
-	// custom config
-	if customConfig != nil {
-		if err = yaml.Unmarshal(data, customConfig); err != nil {
-			log.Fatal(err)
-		} else {
-			customConfig.SetConfig(config)
-		}
-	}
-
-	return config
+	return MustNewConfigCustom(data, customConfig)
 }
