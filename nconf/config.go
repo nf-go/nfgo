@@ -22,6 +22,7 @@ type Config struct {
 
 // AppConfig -
 type AppConfig struct {
+	Group   string    `yaml:"group"`
 	Name    string    `yaml:"name"`
 	Profile string    `yaml:"profile"`
 	Ext     ExtConfig `yaml:"ext"`

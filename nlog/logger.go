@@ -38,6 +38,7 @@ var (
 // InitLogger -
 func InitLogger(config *nconf.Config) {
 	fields := NewFields(
+		"group", config.App.Group,
 		"app", config.App.Name,
 		"profile", config.App.Profile,
 	)
