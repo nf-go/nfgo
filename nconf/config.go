@@ -22,10 +22,11 @@ type Config struct {
 
 // AppConfig -
 type AppConfig struct {
-	Group   string    `yaml:"group"`
-	Name    string    `yaml:"name"`
-	Profile string    `yaml:"profile"`
-	Ext     ExtConfig `yaml:"ext"`
+	Group      string    `yaml:"group"`
+	Name       string    `yaml:"name"`
+	Profile    string    `yaml:"profile"`
+	GOMAXPROCS int       `yaml:"goMaxProcs"`
+	Ext        ExtConfig `yaml:"ext"`
 }
 
 // IsProfileLocal -

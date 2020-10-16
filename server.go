@@ -5,9 +5,11 @@ import (
 	"errors"
 	"os"
 	"os/signal"
+	"runtime"
 	"sync"
 	"syscall"
 
+	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/multierr"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
@@ -53,8 +55,23 @@ func (s *nfgoServer) RegisterOnShutdown(f func() error) {
 	s.mu.Unlock()
 }
 
+func (s *nfgoServer) autoSetMaxProcs() {
+	if maxProcs := s.config.App.GOMAXPROCS; maxProcs > 0 {
+		runtime.GOMAXPROCS(maxProcs)
+	} else {
+		undo, err := maxprocs.Set()
+		defer undo()
+		if err != nil {
+			nlog.Fatal("fail to auto set max procs", err)
+		}
+	}
+	nlog.Infof("auto max procs, procs=%d", runtime.GOMAXPROCS(-1))
+}
+
 // Serve -
 func (s *nfgoServer) MustServe() {
+	s.autoSetMaxProcs()
+
 	for _, server := range s.servers {
 		go server.MustServe()
 	}
