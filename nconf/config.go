@@ -132,6 +132,7 @@ type RedisConfig struct {
 	MaxActive       int32                `yaml:"maxActive"`
 	TestOnBorrow    bool                 `yaml:"testOnBorrow"`
 	Sentinel        *RedisSentinelConfig `yaml:"sentinel"`
+	Cluster         *RedisClusterConfig  `yaml:"cluster"`
 }
 
 // RedisSentinelConfig -

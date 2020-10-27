@@ -8,9 +8,36 @@ import (
 
 	"github.com/FZambia/sentinel"
 	"github.com/gomodule/redigo/redis"
+	"github.com/mna/redisc"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
 )
+
+// RedisPool -
+type RedisPool interface {
+	Get() redis.Conn
+	Close() error
+}
+
+// NewRedisPool -
+func NewRedisPool(redisConfig *nconf.RedisConfig) (RedisPool, error) {
+	if redisConfig.Sentinel != nil {
+		return newSentinelRedisPool(redisConfig)
+	}
+	if redisConfig.Cluster != nil {
+		return newClusterRedisPool(redisConfig)
+	}
+	return newRedisPool(redisConfig)
+}
+
+// MustNewRedisPool -
+func MustNewRedisPool(redisConfig *nconf.RedisConfig) RedisPool {
+	pool, err := NewRedisPool(redisConfig)
+	if err != nil {
+		nlog.Fatal("fail to new redis pool: ", err)
+	}
+	return pool
+}
 
 func diaContextFunc(addr, pass string, database uint8) func(ctx context.Context) (redis.Conn, error) {
 	return func(ctx context.Context) (redis.Conn, error) {
@@ -35,17 +62,15 @@ func diaContextFunc(addr, pass string, database uint8) func(ctx context.Context)
 	}
 }
 
-func testOnBorrowFunc() func(c redis.Conn, t time.Time) error {
-	return func(conn redis.Conn, t time.Time) error {
-		if time.Since(t) < time.Minute {
-			return nil
-		}
-		_, err := conn.Do("PING")
-		return err
+func testOnBorrow(conn redis.Conn, t time.Time) error {
+	if time.Since(t) < time.Minute {
+		return nil
 	}
+	_, err := conn.Do("PING")
+	return err
 }
 
-func newRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
+func newPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 	if redisConfig == nil {
 		return nil, errors.New("redisConfig is nil")
 	}
@@ -58,9 +83,9 @@ func newRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 	}, nil
 }
 
-// NewRedisPool -
-func NewRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
-	redisPool, err := newRedisPool(redisConfig)
+// newRedisPool  - stand-alone redis
+func newRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
+	redisPool, err := newPool(redisConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -69,23 +94,14 @@ func NewRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 	redisPool.DialContext = diaContextFunc(addr, redisConfig.Password, redisConfig.Database)
 
 	if redisConfig.TestOnBorrow {
-		redisPool.TestOnBorrow = testOnBorrowFunc()
+		redisPool.TestOnBorrow = testOnBorrow
 	}
 	return redisPool, nil
 }
 
-// MustNewRedisPool -
-func MustNewRedisPool(redisConfig *nconf.RedisConfig) *redis.Pool {
-	pool, err := NewRedisPool(redisConfig)
-	if err != nil {
-		nlog.Fatal("fail to new redis pool: ", err)
-	}
-	return pool
-}
-
-// NewSentinelRedisPool -
-func NewSentinelRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
-	redisPool, err := newRedisPool(redisConfig)
+// newSentinelRedisPool - sentinel redis
+func newSentinelRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
+	redisPool, err := newPool(redisConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -124,11 +140,31 @@ func NewSentinelRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 	return redisPool, nil
 }
 
-// MustNewSentinelRedisPool -
-func MustNewSentinelRedisPool(redisConfig *nconf.RedisConfig) *redis.Pool {
-	pool, err := NewSentinelRedisPool(redisConfig)
-	if err != nil {
-		nlog.Fatal("fail to new redis pool: ", err)
+// newClusterRedisPool - redis cluster
+func newClusterRedisPool(redisConfig *nconf.RedisConfig) (*redisc.Cluster, error) {
+	dialOptions := []redis.DialOption{}
+	if redisConfig.Password != "" {
+		dialOptions = append(dialOptions, redis.DialPassword(redisConfig.Password))
 	}
-	return pool
+	cluster := &redisc.Cluster{
+		StartupNodes: redisConfig.Cluster.Addrs,
+		DialOptions:  dialOptions,
+		CreatePool: func(addr string, opts ...redis.DialOption) (*redis.Pool, error) {
+			pool, err := newPool(redisConfig)
+			if err != nil {
+				return nil, err
+			}
+			pool.Dial = func() (redis.Conn, error) {
+				return redis.Dial("tcp", addr, opts...)
+			}
+			if redisConfig.TestOnBorrow {
+				pool.TestOnBorrow = testOnBorrow
+			}
+			return pool, nil
+		},
+	}
+	if err := cluster.Refresh(); err != nil {
+		return nil, err
+	}
+	return cluster, nil
 }

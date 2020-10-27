@@ -9,7 +9,7 @@ import (
 )
 
 // NewRedisOper -
-func NewRedisOper(redisPool *redis.Pool) RedisOper {
+func NewRedisOper(redisPool RedisPool) RedisOper {
 	return &redisOperImpl{
 		redisPool: redisPool,
 	}
@@ -33,7 +33,7 @@ type RedisOper interface {
 }
 
 type redisOperImpl struct {
-	redisPool *redis.Pool
+	redisPool RedisPool
 }
 
 func (r *redisOperImpl) Conn() redis.Conn {
