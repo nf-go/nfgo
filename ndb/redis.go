@@ -41,24 +41,14 @@ func MustNewRedisPool(redisConfig *nconf.RedisConfig) RedisPool {
 
 func diaContextFunc(addr, pass string, database uint8) func(ctx context.Context) (redis.Conn, error) {
 	return func(ctx context.Context) (redis.Conn, error) {
-		conn, err := redis.DialContext(ctx, "tcp", addr)
-		if err != nil {
-			return nil, err
-		}
-
+		dialOptions := make([]redis.DialOption, 0, 2)
 		if pass != "" {
-			if _, err := conn.Do("AUTH", pass); err != nil {
-				conn.Close()
-				return nil, err
-			}
+			dialOptions = append(dialOptions, redis.DialPassword(pass))
 		}
-
-		if _, err := conn.Do("SELECT", database); err != nil {
-			conn.Close()
-			return nil, err
+		if database > 0 {
+			dialOptions = append(dialOptions, redis.DialDatabase(int(database)))
 		}
-
-		return conn, nil
+		return redis.DialContext(ctx, "tcp", addr, dialOptions...)
 	}
 }
 
