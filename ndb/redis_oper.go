@@ -42,6 +42,9 @@ type RedisOper interface {
 	SetObject(key string, value interface{}) error
 	SetObjectOpts(key string, value interface{}, setnx bool, setxx bool, ttl time.Duration) error
 
+	Unlink(key string) error
+	Unlinks(keys ...string) error
+
 	Delete(key string) error
 	Deletes(keys ...string) error
 }
@@ -134,25 +137,41 @@ func (r *redisOperImpl) SetObjectOpts(key string, value interface{}, setnx bool,
 	return err
 }
 
-func (r *redisOperImpl) Delete(key string) error {
+func (r *redisOperImpl) del(delCmd string, key string) error {
 	conn := r.redisPool.Get()
 	defer conn.Close()
-	_, err := conn.Do("DEL", key)
+	_, err := conn.Do(delCmd, key)
 	return err
 }
 
-func (r *redisOperImpl) Deletes(keys ...string) error {
+func (r *redisOperImpl) dels(delCmd string, keys ...string) error {
 	conn := r.redisPool.Get()
 	defer conn.Close()
 	if _, err := conn.Do("MULTI"); err != nil {
 		return err
 	}
 	for _, key := range keys {
-		if _, err := conn.Do("DEL", key); err != nil {
+		if _, err := conn.Do(delCmd, key); err != nil {
 			return err
 		}
 
 	}
 	_, err := conn.Do("EXEC")
 	return err
+}
+
+func (r *redisOperImpl) Unlink(key string) error {
+	return r.del("UNLINK", key)
+}
+
+func (r *redisOperImpl) Unlinks(keys ...string) error {
+	return r.dels("UNLINK", keys...)
+}
+
+func (r *redisOperImpl) Delete(key string) error {
+	return r.del("DEL", key)
+}
+
+func (r *redisOperImpl) Deletes(keys ...string) error {
+	return r.dels("DEL", keys...)
 }
