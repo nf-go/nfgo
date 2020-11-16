@@ -69,6 +69,13 @@ func (s *nfgoServer) RegisterOnShutdown(f func() error) {
 	s.mu.Unlock()
 }
 
+// Serve -
+func (s *nfgoServer) MustServe() {
+	s.autoSetMaxProcs()
+	s.serve()
+	s.shutdown()
+}
+
 func (s *nfgoServer) autoSetMaxProcs() {
 	if maxProcs := s.config.App.GOMAXPROCS; maxProcs > 0 {
 		runtime.GOMAXPROCS(maxProcs)
@@ -82,27 +89,41 @@ func (s *nfgoServer) autoSetMaxProcs() {
 	nlog.Infof("auto max procs, procs=%d", runtime.GOMAXPROCS(-1))
 }
 
-// Serve -
-func (s *nfgoServer) MustServe() {
-	s.autoSetMaxProcs()
-
+func (s *nfgoServer) serve() {
 	for _, server := range s.servers {
 		go server.MustServe()
 	}
-
-	// Wait for interrupt signal to gracefully shutdown the server with a timeout of configured seconds.
+	// Wait for interrupt signal to shutdown the server
 	quit := make(chan os.Signal)
 	// kill (no param) default send syscall.SIGTERM
 	// kill -2 is syscall.SIGINT
 	// kill -9 is syscall.SIGKILL but can't be catch, so don't need add it
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	<-quit
+}
 
+func (s *nfgoServer) shutdown() {
 	nlog.Info("the server is going to shutdown...")
 	timeout := s.config.GraceTermination.GraceTerminationPeriod
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
+	cleaned := make(chan error)
+	go s.cleanup(ctx, cleaned)
+
+	select {
+	case err := <-cleaned:
+		if err != nil {
+			nlog.Error("the server is stopped with error: ", err)
+		} else {
+			nlog.Info("the server is stopped normally.")
+		}
+	case <-ctx.Done():
+		nlog.Error("shutdown timeout, the server is stopped forcibly.")
+	}
+}
+
+func (s *nfgoServer) cleanup(ctx context.Context, cleaned chan<- error) {
 	var err error
 	for _, server := range s.servers {
 		err = multierr.Append(err, server.Shutdown(ctx))
@@ -110,9 +131,5 @@ func (s *nfgoServer) MustServe() {
 	for _, f := range s.onShutdown {
 		err = multierr.Append(err, f())
 	}
-	if err != nil {
-		nlog.Info("the server is stopped normally.")
-	} else {
-		nlog.Error("the server is forced to stop.", err)
-	}
+	cleaned <- err
 }

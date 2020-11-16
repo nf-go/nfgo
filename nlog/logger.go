@@ -207,5 +207,8 @@ func SetLevel(level Level) {
 // Sync - Sync calls the underlying Core's Sync method, flushing any buffered log entries.
 // Applications should take care to call Sync before exiting.
 func Sync() error {
-	return pkgLogger.SugaredLogger.Sync()
+	// ignore "sync /dev/stderr: inappropriate ioctl for device" error
+	logger.SugaredLogger.Sync()
+	pkgLogger.SugaredLogger.Sync()
+	return nil
 }
