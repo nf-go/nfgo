@@ -24,8 +24,8 @@ import (
 	"syscall"
 
 	"go.uber.org/automaxprocs/maxprocs"
-	"go.uber.org/multierr"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/nerrors"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/graceful"
 )
@@ -126,10 +126,10 @@ func (s *nfgoServer) shutdown() {
 func (s *nfgoServer) cleanup(ctx context.Context, cleaned chan<- error) {
 	var err error
 	for _, server := range s.servers {
-		err = multierr.Append(err, server.Shutdown(ctx))
+		err = nerrors.Append(err, server.Shutdown(ctx))
 	}
 	for _, f := range s.onShutdown {
-		err = multierr.Append(err, f())
+		err = nerrors.Append(err, f())
 	}
 	cleaned <- err
 }
