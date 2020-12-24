@@ -4,14 +4,14 @@ go 1.14
 
 require (
 	github.com/FZambia/sentinel v1.1.0
-	github.com/casbin/casbin/v2 v2.19.4
+	github.com/casbin/casbin/v2 v2.19.7
 	github.com/casbin/gorm-adapter/v3 v3.0.4
 	github.com/gin-gonic/gin v1.6.3
 	github.com/gomodule/redigo v1.8.3
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mna/redisc v1.1.7
 	github.com/pascaldekloe/jwt v1.10.0
-	github.com/prometheus/client_golang v1.8.0
+	github.com/prometheus/client_golang v1.9.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14

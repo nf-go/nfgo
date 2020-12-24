@@ -18,39 +18,33 @@ import "fmt"
 
 var (
 	// ErrInternal -
-	ErrInternal = NewBizError(-1, "内部服务错误")
+	ErrInternal = NewBizError(-1, "internal service error")
 	// ErrUnauthorized -
-	ErrUnauthorized = NewBizError(-2, "未能通过认证")
+	ErrUnauthorized = NewBizError(-2, "unauthorized")
 	// ErrForbidden -
-	ErrForbidden = NewBizError(-3, "无权访问")
+	ErrForbidden = NewBizError(-3, "forbidden")
 )
 
 // BizError -
 type BizError interface {
 	error
-	Unwrap() error
 	Code() int
 	Msg() string
 }
 
 // NewBizError -
 func NewBizError(code int16, msg string) BizError {
-	return &bizError{code: code, msg: msg, err: nil}
+	return &bizError{code: code, msg: msg}
 }
 
-// bizError - 业务错误
+// bizError -
 type bizError struct {
 	code int16
 	msg  string
-	err  error
 }
 
 func (e *bizError) Error() string {
 	return fmt.Sprintf("biz error %d %s", e.code, e.msg)
-}
-
-func (e *bizError) Unwrap() error {
-	return e.err
 }
 
 // Code -
