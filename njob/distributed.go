@@ -17,9 +17,12 @@ package njob
 import (
 	"time"
 
+	"github.com/gomodule/redigo/redis"
 	"github.com/robfig/cron/v3"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/ndb"
 	"nfgo.ga/nfgo/nlog"
+	"nfgo.ga/nfgo/nutil"
 )
 
 // DistributedMutex -
@@ -41,4 +44,49 @@ func distributedRunning(conf *nconf.Config, jobName string, mutex DistributedMut
 		})
 	}
 
+}
+
+type redisMutex struct {
+	redisOper   ndb.RedisOper
+	lockTimeout time.Duration
+}
+
+// NewRedisDistributedMutex -
+// This is just an example, and it is recommended to use ETCD for distributed lock.
+// In addition, This pattern is discouraged in favor of the Redlock(https://redis.io/topics/distlock) algorithm which is only a bit more complex to implement,
+// but offers better guarantees and is fault tolerant.
+func NewRedisDistributedMutex(redisOper ndb.RedisOper, lockTimeout time.Duration) DistributedMutex {
+	return &redisMutex{
+		redisOper:   redisOper,
+		lockTimeout: lockTimeout,
+	}
+}
+
+func (m *redisMutex) TryRunWithMutex(key string, timeout time.Duration, fn func()) error {
+	token, err := nutil.UUID()
+	if err != nil {
+		return err
+	}
+
+	conn := m.redisOper.Conn()
+	_, err = redis.String(conn.Do("SET", key, token, "PX", int64(m.lockTimeout/time.Millisecond), "NX"))
+	conn.Close()
+	if err != nil {
+		if err == redis.ErrNil {
+			return nil
+		}
+		return err
+	}
+
+	defer func() {
+		// release the lock
+		if err := m.redisOper.DeleteByKeyValue(key, token); err != nil {
+			nlog.Errorf("fail to release lock %s: %s", key, err)
+		}
+	}()
+
+	// acquired the lock and run the job
+	fn()
+
+	return nil
 }

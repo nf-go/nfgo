@@ -47,6 +47,7 @@ type RedisOper interface {
 
 	Delete(key string) error
 	Deletes(keys ...string) error
+	DeleteByKeyValue(key string, val string) error
 }
 
 type redisOperImpl struct {
@@ -174,4 +175,23 @@ func (r *redisOperImpl) Delete(key string) error {
 
 func (r *redisOperImpl) Deletes(keys ...string) error {
 	return r.dels("DEL", keys...)
+}
+
+func (r *redisOperImpl) DeleteByKeyValue(key string, val string) error {
+	conn := r.redisPool.Get()
+	defer conn.Close()
+	v, err := redis.String(conn.Do("GET", key))
+	if err != nil {
+		if err == redis.ErrNil {
+			return nil
+		}
+		return err
+	}
+
+	if val == v {
+		_, err = conn.Do("DEL", key)
+		return err
+	}
+
+	return nil
 }
