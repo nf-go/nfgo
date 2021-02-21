@@ -21,8 +21,8 @@ import (
 )
 
 func TestContextOthers(t *testing.T) {
+	a := assert.New(t)
 	m := NewMDC()
 	v := m.Other("notexist")
-	assert.NotNil(t, v)
-	t.Log(v)
+	a.Nil(v)
 }
