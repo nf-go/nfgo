@@ -29,5 +29,5 @@ func NewJobContext(jobName string) context.Context {
 	mdc.SetSubjectID(jobName)
 
 	ctx := context.Background()
-	return ncontext.BindMDCToContext(ctx, mdc)
+	return ncontext.WithMDC(ctx, mdc)
 }

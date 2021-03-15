@@ -107,5 +107,5 @@ func bindMDCToContext(ctx context.Context, fullMethodName string) (context.Conte
 	mdc.SetRPCName(fullMethodName)
 	mdc.SetSubjectID(subject)
 
-	return ncontext.BindMDCToContext(ctx, mdc), nil
+	return ncontext.WithMDC(ctx, mdc), nil
 }

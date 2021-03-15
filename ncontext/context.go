@@ -29,27 +29,26 @@ const (
 	CtxKeyMDC
 )
 
+// ROMDC - Readonly Mapped Diagnostic Context
+type ROMDC interface {
+	ClientType() string
+	TraceID() string
+	SubjectID() string
+	RPCName() string
+	APIName() string
+	ClientIP() string
+	Other(key string) interface{}
+}
+
 // MDC - Mapped Diagnostic Context
 type MDC interface {
-	ClientType() string
+	ROMDC
 	SetClientType(clientType string)
-
-	TraceID() string
 	SetTraceID(traceID string)
-
-	SubjectID() string
 	SetSubjectID(subjectID string)
-
-	RPCName() string
 	SetRPCName(rpcName string)
-
-	APIName() string
 	SetAPIName(apiName string)
-
-	ClientIP() string
 	SetClientIP(clinetIP string)
-
-	Other(key string) interface{}
 	SetOther(key string, value interface{})
 }
 
@@ -60,16 +59,16 @@ func NewMDC() MDC {
 	}
 }
 
-// BindMDCToContext -
-func BindMDCToContext(ctx context.Context, m MDC) context.Context {
+// WithMDC -
+func WithMDC(ctx context.Context, m MDC) context.Context {
 	return context.WithValue(ctx, CtxKeyMDC, m)
 }
 
 // CurrentMDC -
-func CurrentMDC(ctx context.Context) (MDC, error) {
+func CurrentMDC(ctx context.Context) (ROMDC, error) {
 	v := ctx.Value(CtxKeyMDC)
-	if mc, ok := v.(MDC); ok {
-		return MDC(mc), nil
+	if mc, ok := v.(ROMDC); ok {
+		return ROMDC(mc), nil
 	}
 	return nil, errors.New("can't extract MDC from the context")
 }

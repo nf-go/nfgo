@@ -45,7 +45,7 @@ func BindMDC() HandlerFunc {
 		mdc.SetClientType(c.GetHeader(nconst.HeaderClientType))
 		mdc.SetSubjectID(c.GetHeader(nconst.HeaderSub))
 
-		ctx := ncontext.BindMDCToContext(c.Request.Context(), mdc)
+		ctx := ncontext.WithMDC(c.Request.Context(), mdc)
 		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}
