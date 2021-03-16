@@ -15,6 +15,7 @@
 package ncontext
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,4 +26,61 @@ func TestContextOthers(t *testing.T) {
 	m := NewMDC()
 	v := m.Other("notexist")
 	a.Nil(v)
+}
+
+func TestMDCCopy(t *testing.T) {
+	m := NewMDC()
+	m.SetAPIName("api")
+	m.SetClientIP("ip")
+	m.SetClientType("type")
+	m.SetRPCName("rpc")
+	m.SetSubjectID("s")
+	m.SetTraceID("t")
+	m.SetOther("k1", "v1")
+	m.SetOther("k2", "v2")
+	cm := m.Copy()
+
+	a := assert.New(t)
+	a.Equal("api", cm.APIName())
+	a.Equal("ip", cm.ClientIP())
+	a.Equal("type", cm.ClientType())
+	a.Equal("rpc", cm.RPCName())
+	a.Equal("s", cm.SubjectID())
+	a.Equal("t", cm.TraceID())
+	a.Equal("v1", cm.Other("k1"))
+	a.Equal("v2", cm.Other("k2"))
+	a.NotEqual(m, cm)
+}
+
+func TestBackground(t *testing.T) {
+	m := NewMDC()
+	m.SetAPIName("api")
+	m.SetOther("k1", "v1")
+	m.SetOther("k2", "v2")
+	ctx1 := WithMDC(context.Background(), m)
+	ctx2 := Background(ctx1)
+
+	a := assert.New(t)
+	a.NotEqual(ctx1, ctx2)
+	cm, err := CurrentMDC(ctx2)
+	a.Nil(err)
+	a.Equal("api", cm.APIName())
+	a.Equal("v1", cm.Other("k1"))
+	a.Equal("v2", cm.Other("k2"))
+	a.NotEqual(m, cm)
+	a.Nil(ctx1.Value(0))
+	a.NotNil(ctx1.Value(ctxKeyMDC))
+}
+
+func TestBackgroundNilMDC(t *testing.T) {
+
+	ctx1 := context.Background()
+	ctx2 := Background(ctx1)
+
+	a := assert.New(t)
+	a.Equal(ctx1, ctx2)
+	cm, err := CurrentMDC(ctx2)
+	a.Contains(err.Error(), "can't extract MDC from the context")
+	a.Nil(cm)
+
 }

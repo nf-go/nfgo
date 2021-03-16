@@ -135,7 +135,7 @@ func newSentinelRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 	if redisConfig.TestOnBorrow {
 		redisPool.TestOnBorrow = func(c redis.Conn, t time.Time) error {
 			if !sentinel.TestRole(c, "master") {
-				return errors.New("Role check failed")
+				return errors.New("role check failed")
 			}
 			return nil
 		}

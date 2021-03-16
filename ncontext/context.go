@@ -23,10 +23,7 @@ import (
 type ctxKeyName int
 
 const (
-	// CtxKeyDb -
-	CtxKeyDb ctxKeyName = iota
-	// CtxKeyMDC -
-	CtxKeyMDC
+	ctxKeyMDC ctxKeyName = iota
 )
 
 // ROMDC - Readonly Mapped Diagnostic Context
@@ -38,6 +35,8 @@ type ROMDC interface {
 	APIName() string
 	ClientIP() string
 	Other(key string) interface{}
+	// Copy returns a copy of the romdc.
+	Copy() MDC
 }
 
 // MDC - Mapped Diagnostic Context
@@ -61,12 +60,22 @@ func NewMDC() MDC {
 
 // WithMDC -
 func WithMDC(ctx context.Context, m MDC) context.Context {
-	return context.WithValue(ctx, CtxKeyMDC, m)
+	return context.WithValue(ctx, ctxKeyMDC, m)
+}
+
+// Background returns a non-nil, empty Context. It is never canceled.
+// It will copy the param ctx's mdc.
+func Background(ctx context.Context) context.Context {
+	md, _ := CurrentMDC(ctx)
+	if md == nil {
+		return context.Background()
+	}
+	return WithMDC(context.Background(), md.Copy())
 }
 
 // CurrentMDC -
 func CurrentMDC(ctx context.Context) (ROMDC, error) {
-	v := ctx.Value(CtxKeyMDC)
+	v := ctx.Value(ctxKeyMDC)
 	if mc, ok := v.(ROMDC); ok {
 		return ROMDC(mc), nil
 	}
@@ -81,6 +90,23 @@ type mdc struct {
 	apiName    string
 	clinetIP   string
 	others     *sync.Map
+}
+
+func (m *mdc) Copy() MDC {
+	cm := &mdc{
+		clientType: m.clientType,
+		traceID:    m.traceID,
+		subjectID:  m.subjectID,
+		rpcName:    m.rpcName,
+		apiName:    m.apiName,
+		clinetIP:   m.clinetIP,
+		others:     &sync.Map{},
+	}
+	m.others.Range(func(key, value interface{}) bool {
+		cm.others.Store(key, value)
+		return true
+	})
+	return cm
 }
 
 func (m *mdc) ClientType() string {

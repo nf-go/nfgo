@@ -26,9 +26,8 @@ import (
 
 // https://github.com/go-gorm/gorm/blob/master/logger/logger.go
 type dbLogger struct {
-	LogLevel                            logger.LogLevel
-	SlowThreshold                       time.Duration
-	traceStr, traceErrStr, traceWarnStr string
+	LogLevel      logger.LogLevel
+	SlowThreshold time.Duration
 }
 
 func newLogger(config *nconf.DbConfig) *dbLogger {

@@ -27,8 +27,9 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-	"nfgo.ga/nfgo/ncontext"
 )
+
+type ctxKeyDb struct{}
 
 // NewDB -
 func NewDB(dbConfig *nconf.DbConfig) (*gorm.DB, error) {
@@ -74,7 +75,7 @@ func MustNewDB(dbConfig *nconf.DbConfig) *gorm.DB {
 
 // WithContext -
 func WithContext(ctx context.Context, defaultDB *gorm.DB) *gorm.DB {
-	v := ctx.Value(ncontext.CtxKeyDb)
+	v := ctx.Value(ctxKeyDb{})
 	if dbInCtx, ok := v.(*gorm.DB); ok {
 		return dbInCtx.WithContext(ctx)
 	}
@@ -86,7 +87,7 @@ func Transactional(ctx context.Context, db *gorm.DB, fn func(ctx context.Context
 	panicked := true
 	tx := db.Begin(&sql.TxOptions{Isolation: sql.LevelDefault})
 	if tx.Error != nil {
-		return fmt.Errorf("Unable to begin transaction: %w", tx.Error)
+		return fmt.Errorf("unable to begin transaction: %w", tx.Error)
 	}
 
 	defer func() {
@@ -96,7 +97,7 @@ func Transactional(ctx context.Context, db *gorm.DB, fn func(ctx context.Context
 		}
 	}()
 
-	ctx = context.WithValue(ctx, ncontext.CtxKeyDb, tx)
+	ctx = context.WithValue(ctx, ctxKeyDb{}, tx)
 	err = fn(ctx)
 
 	if err == nil {
