@@ -29,7 +29,6 @@ type Config struct {
 	Web              *WebConfig              `yaml:"web"`
 	RPC              *RPCConfig              `yaml:"rpc"`
 	CronConfig       *CronConfig             `yaml:"cron"`
-	Security         *SecurityConfig         `yaml:"security"`
 	Metrics          *MetricsConfig          `yaml:"metrics"`
 	GraceTermination *GraceTerminationConfig `yaml:"graceTermination"`
 }
@@ -163,16 +162,6 @@ type RedisClusterConfig struct {
 	Addrs []string `yaml:"addrs"`
 	// MaxRedirects -Maximum number of redirects to follow when executing commands across the cluster.
 	MaxRedirects int32 `yaml:"maxRedirects"`
-}
-
-// SecurityConfig -
-type SecurityConfig struct {
-	SignKeyLifeTime    time.Duration `yaml:"signKeyLifeTime"`
-	RefreshSignKeyLife bool          `yaml:"refreshSignKeyLife"`
-	TimeWindow         time.Duration `yaml:"timeWindow"`
-	Anons              []string      `yaml:"anons"`
-	Model              string        `yaml:"model"`
-	Policies           []string      `yaml:"policies"`
 }
 
 // MetricsConfig -

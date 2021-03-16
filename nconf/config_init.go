@@ -59,12 +59,12 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 	}
 
 	file, err := os.Open(confPath)
-	defer file.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	data, err := ioutil.ReadAll(file)
+	file.Close()
 	if err != nil {
 		log.Fatal(err)
 	}

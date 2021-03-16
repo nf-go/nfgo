@@ -46,7 +46,6 @@ func (conf *Config) SetDefaultValues() {
 		conf.Web,
 		conf.RPC,
 		conf.CronConfig,
-		conf.Security,
 		conf.Metrics,
 		conf.GraceTermination,
 	)
@@ -128,16 +127,6 @@ func (conf *RPCClientConfig) SetDefaultValues() {
 	}
 	if conf.Plaintext == nil {
 		conf.Plaintext = ntypes.Bool(true)
-	}
-}
-
-// SetDefaultValues -
-func (conf *SecurityConfig) SetDefaultValues() {
-	if conf.TimeWindow == 0 {
-		conf.TimeWindow = 30 * time.Minute
-	}
-	if conf.SignKeyLifeTime == 0 {
-		conf.SignKeyLifeTime = 365 * 24 * time.Hour
 	}
 }
 
