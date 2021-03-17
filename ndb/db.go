@@ -15,8 +15,6 @@
 package ndb
 
 import (
-	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 
@@ -28,8 +26,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 )
-
-type ctxKeyDb struct{}
 
 // NewDB -
 func NewDB(dbConfig *nconf.DbConfig) (*gorm.DB, error) {
@@ -71,38 +67,4 @@ func MustNewDB(dbConfig *nconf.DbConfig) *gorm.DB {
 		nlog.Fatal("fail to new db: ", err)
 	}
 	return db
-}
-
-// WithContext -
-func WithContext(ctx context.Context, defaultDB *gorm.DB) *gorm.DB {
-	v := ctx.Value(ctxKeyDb{})
-	if dbInCtx, ok := v.(*gorm.DB); ok {
-		return dbInCtx.WithContext(ctx)
-	}
-	return defaultDB.WithContext(ctx)
-}
-
-// Transactional -
-func Transactional(ctx context.Context, db *gorm.DB, fn func(ctx context.Context) error) (err error) {
-	panicked := true
-	tx := db.Begin(&sql.TxOptions{Isolation: sql.LevelDefault})
-	if tx.Error != nil {
-		return fmt.Errorf("unable to begin transaction: %w", tx.Error)
-	}
-
-	defer func() {
-		// Make sure to rollback when panic, Block error or Commit error
-		if panicked || err != nil {
-			tx.Rollback()
-		}
-	}()
-
-	ctx = context.WithValue(ctx, ctxKeyDb{}, tx)
-	err = fn(ctx)
-
-	if err == nil {
-		err = tx.Commit().Error
-	}
-	panicked = false
-	return
 }
