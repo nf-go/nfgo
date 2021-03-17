@@ -23,8 +23,8 @@ import (
 	"strings"
 	"time"
 
-	"nfgo.ga/nfgo/nconst"
 	"nfgo.ga/nfgo/nlog"
+	"nfgo.ga/nfgo/nutil/nconst"
 
 	"github.com/gin-gonic/gin"
 	"nfgo.ga/nfgo/nerrors"

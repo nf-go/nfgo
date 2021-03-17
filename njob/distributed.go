@@ -22,7 +22,7 @@ import (
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/ndb"
 	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil"
+	"nfgo.ga/nfgo/nutil/ncrypto"
 )
 
 // DistributedMutex -
@@ -63,7 +63,7 @@ func NewRedisDistributedMutex(redisOper ndb.RedisOper, lockTimeout time.Duration
 }
 
 func (m *redisMutex) TryRunWithMutex(key string, timeout time.Duration, fn func()) error {
-	token, err := nutil.UUID()
+	token, err := ncrypto.UUID()
 	if err != nil {
 		return err
 	}

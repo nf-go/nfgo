@@ -19,13 +19,14 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // ValidateUnaryClientInterceptor -
 func ValidateUnaryClientInterceptor(ctx context.Context, method string, req interface{}, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	if v, ok := req.(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return grpc.Errorf(codes.InvalidArgument, err.Error())
+			return status.Errorf(codes.InvalidArgument, err.Error())
 		}
 	}
 	return invoker(ctx, method, req, reply, cc, opts...)
@@ -48,7 +49,7 @@ func ValidateStreamClientInterceptor(ctx context.Context, desc *grpc.StreamDesc,
 func ValidateUnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	if v, ok := req.(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return nil, grpc.Errorf(codes.InvalidArgument, err.Error())
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
 		}
 	}
 	return handler(ctx, req)

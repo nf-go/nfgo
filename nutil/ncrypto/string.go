@@ -12,28 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package nutil
+package ncrypto
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"math/rand"
-	"reflect"
 	"time"
 
-	"nfgo.ga/nfgo/nutil/id"
+	"github.com/google/uuid"
 )
 
 const letterBytes = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-// RedisKey -
-type RedisKey string
-
-// Key -
-func (k RedisKey) Key(a ...interface{}) string {
-	return fmt.Sprintf(string(k), a...)
-}
 
 // Sha256 -
 func Sha256(plain string) string {
@@ -51,26 +41,11 @@ func RandString(length int) string {
 	return string(b)
 }
 
-// UUID -
+// UUID - String returns the string form of uuid, xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 func UUID() (string, error) {
-	uuid, err := id.NewUUID()
+	uuid, err := uuid.NewUUID()
 	if err != nil {
 		return "", err
 	}
-	return uuid.Hex(), err
-}
-
-// IsNil -
-func IsNil(i interface{}) bool {
-	v := reflect.ValueOf(i)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Chan, reflect.Func, reflect.Map, reflect.Slice, reflect.Interface, reflect.UnsafePointer:
-		return v.IsNil()
-	}
-	return i == nil
-}
-
-// IsNotNil -
-func IsNotNil(i interface{}) bool {
-	return !IsNil(i)
+	return uuid.String(), err
 }

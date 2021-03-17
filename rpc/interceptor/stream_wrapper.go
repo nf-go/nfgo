@@ -22,6 +22,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"nfgo.ga/nfgo/nlog"
 )
 
@@ -76,7 +77,7 @@ func (s *serverStreamWrapper) RecvMsg(m interface{}) error {
 	if s.validateMsg && err == nil {
 		if v, ok := m.(interface{ Validate() error }); ok {
 			if err = v.Validate(); err != nil {
-				err = grpc.Errorf(codes.InvalidArgument, err.Error())
+				err = status.Errorf(codes.InvalidArgument, err.Error())
 			}
 		}
 	}
@@ -120,7 +121,7 @@ func (s *clientStreamWrapper) SendMsg(m interface{}) error {
 	if s.validateMsg {
 		if v, ok := m.(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return grpc.Errorf(codes.InvalidArgument, err.Error())
+				return status.Errorf(codes.InvalidArgument, err.Error())
 			}
 		}
 	}

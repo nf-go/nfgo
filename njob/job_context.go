@@ -18,13 +18,13 @@ import (
 	"context"
 
 	"nfgo.ga/nfgo/ncontext"
-	"nfgo.ga/nfgo/nutil"
+	"nfgo.ga/nfgo/nutil/ncrypto"
 )
 
 // NewJobContext -
 func NewJobContext(jobName string) context.Context {
 	mdc := ncontext.NewMDC()
-	traceID, _ := nutil.UUID()
+	traceID, _ := ncrypto.UUID()
 	mdc.SetTraceID(traceID)
 	mdc.SetSubjectID(jobName)
 

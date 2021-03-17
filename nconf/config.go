@@ -17,7 +17,7 @@ package nconf
 import (
 	"time"
 
-	"nfgo.ga/nfgo/nconst"
+	"nfgo.ga/nfgo/nutil/nconst"
 )
 
 // Config data

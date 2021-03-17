@@ -17,13 +17,12 @@ package nconf
 import (
 	"time"
 
-	"nfgo.ga/nfgo/nutil"
 	"nfgo.ga/nfgo/nutil/ntypes"
 )
 
 func setDefaultValues(configs ...interface{ SetDefaultValues() }) {
 	for _, config := range configs {
-		if nutil.IsNotNil(config) {
+		if ntypes.IsNotNil(config) {
 			config.SetDefaultValues()
 		}
 	}

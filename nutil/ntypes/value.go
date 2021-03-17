@@ -14,7 +14,10 @@
 
 package ntypes
 
-import "time"
+import (
+	"reflect"
+	"time"
+)
 
 // Bool - returns a pointer to the bool value passed in.
 func Bool(v bool) *bool {
@@ -228,4 +231,19 @@ func TimeValue(v *time.Time) time.Time {
 		return *v
 	}
 	return time.Time{}
+}
+
+// IsNil -
+func IsNil(i interface{}) bool {
+	v := reflect.ValueOf(i)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Chan, reflect.Func, reflect.Map, reflect.Slice, reflect.Interface, reflect.UnsafePointer:
+		return v.IsNil()
+	}
+	return i == nil
+}
+
+// IsNotNil -
+func IsNotNil(i interface{}) bool {
+	return !IsNil(i)
 }

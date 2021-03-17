@@ -19,10 +19,10 @@ import (
 	"io"
 	"io/ioutil"
 
-	"nfgo.ga/nfgo/nconst"
 	"nfgo.ga/nfgo/ncontext"
 	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil"
+	"nfgo.ga/nfgo/nutil/nconst"
+	"nfgo.ga/nfgo/nutil/ncrypto"
 )
 
 // BindMDC - BindMDC MiddleWare
@@ -33,7 +33,7 @@ func BindMDC() HandlerFunc {
 		traceID := c.GetHeader(nconst.HeaderTraceID)
 		if traceID == "" {
 			var err error
-			if traceID, err = nutil.UUID(); err != nil {
+			if traceID, err = ncrypto.UUID(); err != nil {
 				c.Fail(err)
 				c.Abort()
 				return

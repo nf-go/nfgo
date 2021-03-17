@@ -17,9 +17,9 @@ package interceptor
 import (
 	"context"
 
-	"nfgo.ga/nfgo/nconst"
 	"nfgo.ga/nfgo/ncontext"
-	"nfgo.ga/nfgo/nutil"
+	"nfgo.ga/nfgo/nutil/nconst"
+	"nfgo.ga/nfgo/nutil/ncrypto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -95,7 +95,7 @@ func bindMDCToContext(ctx context.Context, fullMethodName string) (context.Conte
 	}
 	if traceID == "" {
 		var err error
-		if traceID, err = nutil.UUID(); err != nil {
+		if traceID, err = ncrypto.UUID(); err != nil {
 			return nil, err
 		}
 	}

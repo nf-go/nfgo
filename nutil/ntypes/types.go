@@ -12,7 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package nutil
+package ntypes
+
+import "fmt"
+
+// Key -
+type Key string
+
+// Key -
+func (k Key) String(a ...interface{}) string {
+	return fmt.Sprintf(string(k), a...)
+}
 
 // Page -
 type Page struct {

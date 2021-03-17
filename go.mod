@@ -5,7 +5,9 @@ go 1.14
 require (
 	github.com/FZambia/sentinel v1.1.0
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-playground/assert/v2 v2.0.1
 	github.com/gomodule/redigo v1.8.4
+	github.com/google/uuid v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mna/redisc v1.1.7
 	github.com/pascaldekloe/jwt v1.10.0

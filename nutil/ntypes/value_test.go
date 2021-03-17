@@ -12,32 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package id
+package ntypes
 
-import (
-	"crypto/rand"
-	"encoding/hex"
-	"io"
-)
+import "testing"
 
-// UUID - represents a UUID.
-type UUID [16]byte
-
-// NewUUID - generates a new uuid.
-func NewUUID() (UUID, error) {
-	var uuid [16]byte
-
-	_, err := io.ReadFull(rand.Reader, uuid[:])
-	if err != nil {
-		return [16]byte{}, err
+func TestIsNil(t *testing.T) {
+	var ch chan int
+	if !IsNil(ch) {
+		t.Fatal()
 	}
-	uuid[6] = (uuid[6] & 0x0f) | 0x40 // Version 4
-	uuid[8] = (uuid[8] & 0x3f) | 0x80 // Variant is 10
 
-	return uuid, nil
-}
+	var f func() = nil
+	if !IsNil(f) {
+		t.Fatal()
+	}
 
-// Hex - returns a hex representation of the UUID.
-func (id UUID) Hex() string {
-	return hex.EncodeToString(id[:])
+	var m map[string]int = nil
+	if !IsNil(m) {
+		t.Fatal()
+	}
+
+	var s []int = nil
+	if !IsNil(s) {
+		t.Fatal(s)
+	}
+
+	var obj interface{} = (*int)(nil)
+	if !IsNil(obj) {
+		t.Fatal()
+	}
+
+	var obj2 interface{} = nil
+	if !IsNil(obj2) {
+		t.Fatal()
+	}
+
+	if IsNil("") || IsNil(1) {
+		t.Fatal()
+	}
+
 }

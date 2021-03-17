@@ -19,6 +19,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"nfgo.ga/nfgo/nerrors"
 	"nfgo.ga/nfgo/nlog"
 )
@@ -40,10 +41,10 @@ func ErrorHandleStreamServerInterceptor(srv interface{}, stream grpc.ServerStrea
 func handleServerError(ctx context.Context, err error) error {
 	if err != nil {
 		if bizErr, ok := err.(nerrors.BizError); ok {
-			return grpc.Errorf(codes.Code(bizErr.Code()), bizErr.Msg())
+			return status.Errorf(codes.Code(bizErr.Code()), bizErr.Msg())
 		}
 		nlog.Logger(ctx).WithError(err).Error()
-		return grpc.Errorf(codes.Internal, nerrors.ErrInternal.Msg())
+		return status.Errorf(codes.Internal, nerrors.ErrInternal.Msg())
 	}
 	return nil
 }
