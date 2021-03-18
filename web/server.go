@@ -27,7 +27,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nmetrics"
 	"nfgo.ga/nfgo/nutil/graceful"
 )
 
@@ -36,26 +35,6 @@ type Server interface {
 	graceful.ShutdownServer
 
 	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
-}
-
-// ServerOption -
-type ServerOption struct {
-	MetricsServer nmetrics.Server
-	Middlewares   []HandlerFunc
-}
-
-func (o *ServerOption) setMiddlewaresToEngine(engine *gin.Engine) {
-	middleWares := []gin.HandlerFunc{gin.Recovery()}
-	if o.MetricsServer != nil {
-		middleWares = append(middleWares, o.MetricsServer.WebMetricsMiddleware())
-	}
-	middleWares = append(middleWares, BindMDC().WrapHandler(), Logging().WrapHandler())
-	if len(o.Middlewares) > 0 {
-		for _, m := range o.Middlewares {
-			middleWares = append(middleWares, m.WrapHandler())
-		}
-	}
-	engine.Use(middleWares...)
 }
 
 type server struct {
@@ -118,7 +97,7 @@ func (s *server) configSwagger() error {
 }
 
 // NewServer -
-func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
+func NewServer(config *nconf.Config, opt ...ServerOption) (Server, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -137,10 +116,11 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 	// gin engine
 	engine := gin.New()
 	engine.MaxMultipartMemory = webConfig.MaxMultipartMemory
-	if option == nil {
-		option = &ServerOption{}
+	opts := &serverOptions{}
+	for _, o := range opt {
+		o(opts)
 	}
-	option.setMiddlewaresToEngine(engine)
+	opts.setMiddlewaresToEngine(engine)
 
 	// http server
 	httpServer := &http.Server{
@@ -163,8 +143,8 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 }
 
 // MustNewServer -
-func MustNewServer(config *nconf.Config, option *ServerOption) Server {
-	server, err := NewServer(config, option)
+func MustNewServer(config *nconf.Config, opt ...ServerOption) Server {
+	server, err := NewServer(config, opt...)
 	if err != nil {
 		nlog.Fatal("fail to init http server: ", err)
 	}

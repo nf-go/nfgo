@@ -40,10 +40,16 @@ func ErrorHandleStreamServerInterceptor(srv interface{}, stream grpc.ServerStrea
 
 func handleServerError(ctx context.Context, err error) error {
 	if err != nil {
+		logger := nlog.Logger(ctx).WithError(err)
+
+		// logging biz error
 		if bizErr, ok := err.(nerrors.BizError); ok {
+			logger.Info()
 			return status.Errorf(codes.Code(bizErr.Code()), bizErr.Msg())
 		}
-		nlog.Logger(ctx).WithError(err).Error()
+
+		// logging err
+		logger.Error()
 		return status.Errorf(codes.Internal, nerrors.ErrInternal.Msg())
 	}
 	return nil

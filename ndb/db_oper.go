@@ -24,10 +24,12 @@ import (
 
 type ctxKeyDb struct{}
 
+type Transactional func(ctx context.Context, fn func(ctx context.Context) error) error
+
 // DBOper -
 type DBOper interface {
 	DB(ctx context.Context) *gorm.DB
-	Transactional(ctx context.Context, fn func(ctx context.Context) error) (err error)
+	Transactional(ctx context.Context, fn func(ctx context.Context) error) error
 }
 
 // NewDBOper -

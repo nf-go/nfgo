@@ -16,8 +16,10 @@ package ndb
 
 import (
 	"context"
+	"errors"
 	"time"
 
+	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
 	"nfgo.ga/nfgo/nconf"
@@ -46,7 +48,7 @@ func newLogger(config *nconf.DbConfig) *dbLogger {
 
 	slowThreshold := config.SlowQueryThreshold
 	if slowThreshold == 0 {
-		slowThreshold = 500 * time.Millisecond
+		slowThreshold = 5 * time.Second
 	}
 
 	return &dbLogger{
@@ -81,10 +83,10 @@ func (l *dbLogger) Error(ctx context.Context, msg string, data ...interface{}) {
 }
 
 func (l *dbLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
-	if l.LogLevel > 0 {
+	if l.LogLevel > logger.Silent {
 		elapsed := time.Since(begin)
 		switch {
-		case err != nil && l.LogLevel >= logger.Error:
+		case err != nil && !errors.Is(err, gorm.ErrRecordNotFound) && l.LogLevel >= logger.Error:
 			fileWithLineNum := utils.FileWithLineNum()
 			logEnry(ctx, fileWithLineNum, elapsed, fc).WithError(err).Error()
 		case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.LogLevel >= logger.Warn:

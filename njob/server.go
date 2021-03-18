@@ -31,22 +31,18 @@ type Server interface {
 	graceful.ShutdownServer
 }
 
-// ServerOption -
-type ServerOption struct {
-	JobFuncs         map[string]func()
-	DistributedMutex DistributedMutex
-}
+type JobFuncs map[string]func()
 
 // JobServer -
 type jobServer struct {
 	config *nconf.Config
-	option *ServerOption
+	opts   *serverOptions
 	c      *cron.Cron
 	stop   chan struct{}
 }
 
 // NewServer -
-func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
+func NewServer(config *nconf.Config, opt ...ServerOption) (Server, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -54,10 +50,12 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 	if cronConfig == nil {
 		return nil, errors.New("config.cron is nil")
 	}
-	if option == nil {
-		option = &ServerOption{
-			JobFuncs: map[string]func(){},
-		}
+
+	opts := &serverOptions{
+		jobFuncs: map[string]func(){},
+	}
+	for _, o := range opt {
+		o(opts)
 	}
 
 	jobWrappers := []cron.JobWrapper{cron.Recover(defaultLogger)}
@@ -67,7 +65,7 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 
 	c := cron.New(cron.WithChain(jobWrappers...))
 	return &jobServer{
-		option: option,
+		opts:   opts,
 		config: config,
 		c:      c,
 		stop:   make(chan struct{}),
@@ -75,8 +73,8 @@ func NewServer(config *nconf.Config, option *ServerOption) (Server, error) {
 }
 
 // MustNewServer -
-func MustNewServer(config *nconf.Config, option *ServerOption) Server {
-	server, err := NewServer(config, option)
+func MustNewServer(config *nconf.Config, opt ...ServerOption) Server {
+	server, err := NewServer(config, opt...)
 	if err != nil {
 		nlog.Fatal("fail to init job server: ", err)
 	}
@@ -96,7 +94,7 @@ func (s *jobServer) Serve() error {
 func (s *jobServer) addJobFuncs() error {
 	cronConf := s.config.CronConfig
 	for _, conf := range cronConf.CronJobs {
-		if fn, ok := s.option.JobFuncs[conf.Name]; ok {
+		if fn, ok := s.opts.jobFuncs[conf.Name]; ok {
 			if err := s.addJobFunc(conf, fn); err != nil {
 				return fmt.Errorf("fail to init croJob %s: %w", conf.Name, err)
 			}
@@ -110,9 +108,9 @@ func (s *jobServer) addJobFuncs() error {
 
 func (s *jobServer) addJobFunc(conf *nconf.CronJobConfig, fn func()) error {
 	var job cron.Job = cron.FuncJob(fn)
-	if s.option.DistributedMutex != nil {
+	if s.opts.distributedMutex != nil {
 		job = cron.NewChain(
-			distributedRunning(s.config, conf.Name, s.option.DistributedMutex),
+			distributedRunning(s.config, conf.Name, s.opts.distributedMutex),
 		).Then(job)
 	}
 	_, err := s.c.AddJob(conf.Schedule, job)

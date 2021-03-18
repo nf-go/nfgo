@@ -25,7 +25,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
-	"gorm.io/gorm"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/graceful"
@@ -46,13 +45,8 @@ type Server interface {
 	WebMetricsMiddleware() gin.HandlerFunc
 }
 
-// ServerOption -
-type ServerOption struct {
-	DB *gorm.DB
-}
-
 // NewServer -
-func NewServer(config *nconf.Config, serverOption *ServerOption) (Server, error) {
+func NewServer(config *nconf.Config, opt ...ServerOption) (Server, error) {
 	if config == nil {
 		return nil, errors.New("config is nil")
 	}
@@ -62,10 +56,15 @@ func NewServer(config *nconf.Config, serverOption *ServerOption) (Server, error)
 		return nil, errors.New("metrics config is not initialized in the config")
 	}
 
+	opts := &serverOptions{}
+	for _, o := range opt {
+		o(opts)
+	}
+
 	s := &server{
 		registry:      prometheus.NewRegistry(),
 		metricsConfig: metricsConfig,
-		serverOption:  serverOption,
+		opts:          opts,
 	}
 
 	serverMux := http.NewServeMux()
@@ -83,8 +82,8 @@ func NewServer(config *nconf.Config, serverOption *ServerOption) (Server, error)
 }
 
 // MustNewServer -
-func MustNewServer(config *nconf.Config, serverOption *ServerOption) Server {
-	server, err := NewServer(config, serverOption)
+func MustNewServer(config *nconf.Config, opt ...ServerOption) Server {
+	server, err := NewServer(config, opt...)
 	if err != nil {
 		nlog.Fatal("fail to init promtheus metrics server: ", err)
 	}
@@ -93,7 +92,7 @@ func MustNewServer(config *nconf.Config, serverOption *ServerOption) Server {
 
 type server struct {
 	metricsConfig        *nconf.MetricsConfig
-	serverOption         *ServerOption
+	opts                 *serverOptions
 	httpServer           *http.Server
 	registry             *prometheus.Registry
 	grpcMetricsCollector *grpc_prometheus.ServerMetrics
@@ -117,8 +116,8 @@ func (s *server) Shutdown(ctx context.Context) error {
 
 func (s *server) Serve() error {
 
-	if s.serverOption != nil {
-		db := s.serverOption.DB
+	if s.opts != nil {
+		db := s.opts.db
 		if db != nil {
 			if err := db.Use(s.gormPrometheusPlugin()); err != nil {
 				return err
