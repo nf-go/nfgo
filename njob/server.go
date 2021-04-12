@@ -31,8 +31,6 @@ type Server interface {
 	graceful.ShutdownServer
 }
 
-type JobFuncs map[string]func()
-
 // JobServer -
 type jobServer struct {
 	config *nconf.Config
@@ -52,7 +50,8 @@ func NewServer(config *nconf.Config, opt ...ServerOption) (Server, error) {
 	}
 
 	opts := &serverOptions{
-		jobFuncs: map[string]func(){},
+		funcJobs: map[string]FuncJob{},
+		jobs:     map[string]Job{},
 	}
 	for _, o := range opt {
 		o(opts)
@@ -83,7 +82,7 @@ func MustNewServer(config *nconf.Config, opt ...ServerOption) Server {
 
 // Serve -
 func (s *jobServer) Serve() error {
-	if err := s.addJobFuncs(); err != nil {
+	if err := s.addJobs(); err != nil {
 		return err
 	}
 	s.c.Start()
@@ -91,22 +90,30 @@ func (s *jobServer) Serve() error {
 	return nil
 }
 
-func (s *jobServer) addJobFuncs() error {
+func (s *jobServer) addJobs() error {
 	cronConf := s.config.CronConfig
 	for _, conf := range cronConf.CronJobs {
-		if fn, ok := s.opts.jobFuncs[conf.Name]; ok {
-			if err := s.addJobFunc(conf, fn); err != nil {
+		if fn, ok := s.opts.funcJobs[conf.Name]; ok {
+			if err := s.addJob(conf, fn); err != nil {
+				return fmt.Errorf("fail to init croJob %s: %w", conf.Name, err)
+			}
+		} else if job, ok := s.opts.jobs[conf.Name]; ok {
+			if err := s.addJob(conf, job); err != nil {
 				return fmt.Errorf("fail to init croJob %s: %w", conf.Name, err)
 			}
 		} else {
-			nlog.Warnf("Please provide a job func: %s, use serverOption.JobFuncs", conf.Name)
+			nlog.Warnf("Please provide a job or a jobfunc for %s, use njob.JobsOption or njob.JobFuncsOption", conf.Name)
 		}
 
 	}
 	return nil
 }
 
-func (s *jobServer) addJobFunc(conf *nconf.CronJobConfig, fn func()) error {
+func (s *jobServer) addJob(conf *nconf.CronJobConfig, j Job) error {
+	fn := func() {
+		ctx := newJobContext(conf.Name)
+		j.Run(ctx)
+	}
 	var job cron.Job = cron.FuncJob(fn)
 	if s.opts.distributedMutex != nil {
 		job = cron.NewChain(

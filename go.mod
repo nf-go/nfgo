@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/FZambia/sentinel v1.1.0
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/gomodule/redigo v1.8.4
 	github.com/google/uuid v1.2.0
@@ -19,8 +19,8 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/multierr v1.6.0
 	go.uber.org/zap v1.16.0
-	google.golang.org/grpc v1.36.0
+	google.golang.org/grpc v1.37.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.0.5
-	gorm.io/gorm v1.21.4
+	gorm.io/gorm v1.21.7
 )

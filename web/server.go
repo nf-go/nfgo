@@ -38,10 +38,8 @@ type Server interface {
 }
 
 type server struct {
-	engine *gin.Engine
-	config *nconf.Config
-	// host       string
-	// port       int32
+	engine     *gin.Engine
+	config     *nconf.Config
 	httpServer *http.Server
 }
 

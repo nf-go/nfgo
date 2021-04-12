@@ -15,15 +15,22 @@
 package njob
 
 type serverOptions struct {
-	jobFuncs         JobFuncs
+	funcJobs         FuncJobs
+	jobs             Jobs
 	distributedMutex DistributedMutex
 }
 
 type ServerOption func(*serverOptions)
 
-func JobFuncsOption(jobFuncs JobFuncs) ServerOption {
+func FuncJobsOption(funcJobs FuncJobs) ServerOption {
 	return func(opts *serverOptions) {
-		opts.jobFuncs = jobFuncs
+		opts.funcJobs = funcJobs
+	}
+}
+
+func JobsOption(jobs Jobs) ServerOption {
+	return func(opts *serverOptions) {
+		opts.jobs = jobs
 	}
 }
 

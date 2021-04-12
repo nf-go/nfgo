@@ -21,8 +21,21 @@ import (
 	"nfgo.ga/nfgo/nutil/ncrypto"
 )
 
-// NewJobContext -
-func NewJobContext(jobName string) context.Context {
+type Job interface {
+	Run(ctx context.Context)
+}
+
+type FuncJob func(ctx context.Context)
+
+func (f FuncJob) Run(ctx context.Context) {
+	f(ctx)
+}
+
+type FuncJobs map[string]FuncJob
+
+type Jobs map[string]Job
+
+func newJobContext(jobName string) context.Context {
 	mdc := ncontext.NewMDC()
 	traceID, _ := ncrypto.UUID()
 	mdc.SetTraceID(traceID)
