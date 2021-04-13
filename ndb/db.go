@@ -27,8 +27,22 @@ import (
 	"gorm.io/gorm/schema"
 )
 
+type dbOptions struct {
+	dialector gorm.Dialector
+}
+
+// DBOption -
+type DBOption func(*dbOptions)
+
+// DialectorOption -
+func DialectorOption(dialector gorm.Dialector) DBOption {
+	return func(opts *dbOptions) {
+		opts.dialector = dialector
+	}
+}
+
 // NewDB -
-func NewDB(dbConfig *nconf.DbConfig) (*gorm.DB, error) {
+func NewDB(dbConfig *nconf.DbConfig, opt ...DBOption) (*gorm.DB, error) {
 	if dbConfig == nil {
 		return nil, errors.New("dbConfig is nil")
 	}
@@ -42,11 +56,18 @@ func NewDB(dbConfig *nconf.DbConfig) (*gorm.DB, error) {
 		SkipDefaultTransaction: ntypes.BoolValue(dbConfig.SkipDefaultTransaction),
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=true&loc=Local",
-		dbConfig.Username, dbConfig.Password, dbConfig.Host,
-		dbConfig.Port, dbConfig.Database, dbConfig.Charset)
+	opts := &dbOptions{}
+	for _, o := range opt {
+		o(opts)
+	}
+	if ntypes.IsNil(opts.dialector) {
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=true&loc=Local",
+			dbConfig.Username, dbConfig.Password, dbConfig.Host,
+			dbConfig.Port, dbConfig.Database, dbConfig.Charset)
+		opts.dialector = mysql.Open(dsn)
+	}
 
-	db, err := gorm.Open(mysql.Open(dsn), gormConfig)
+	db, err := gorm.Open(opts.dialector, gormConfig)
 	if err != nil {
 		return nil, fmt.Errorf("fail to open db: %w", err)
 	}
@@ -61,8 +82,8 @@ func NewDB(dbConfig *nconf.DbConfig) (*gorm.DB, error) {
 }
 
 // MustNewDB -
-func MustNewDB(dbConfig *nconf.DbConfig) *gorm.DB {
-	db, err := NewDB(dbConfig)
+func MustNewDB(dbConfig *nconf.DbConfig, opt ...DBOption) *gorm.DB {
+	db, err := NewDB(dbConfig, opt...)
 	if err != nil {
 		nlog.Fatal("fail to new db: ", err)
 	}
