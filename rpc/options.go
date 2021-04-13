@@ -60,20 +60,24 @@ func (opts *serverOptions) setInterceptors() {
 	}
 }
 
+// ServerOption -
 type ServerOption func(*serverOptions)
 
+// MetricsServerOption -
 func MetricsServerOption(s nmetrics.Server) ServerOption {
 	return func(opts *serverOptions) {
 		opts.metricsServer = s
 	}
 }
 
+// UnaryServerInterceptorOption -
 func UnaryServerInterceptorOption(interceptors ...grpc.UnaryServerInterceptor) ServerOption {
 	return func(opts *serverOptions) {
 		opts.unaryServerInterceptors = interceptors
 	}
 }
 
+// StreamServerInterceptorOption -
 func StreamServerInterceptorOption(interceptors ...grpc.StreamServerInterceptor) ServerOption {
 	return func(opts *serverOptions) {
 		opts.streamServerInterceptors = interceptors

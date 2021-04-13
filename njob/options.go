@@ -20,20 +20,24 @@ type serverOptions struct {
 	distributedMutex DistributedMutex
 }
 
+// ServerOption -
 type ServerOption func(*serverOptions)
 
+// FuncJobsOption -
 func FuncJobsOption(funcJobs FuncJobs) ServerOption {
 	return func(opts *serverOptions) {
 		opts.funcJobs = funcJobs
 	}
 }
 
+// JobsOption -
 func JobsOption(jobs Jobs) ServerOption {
 	return func(opts *serverOptions) {
 		opts.jobs = jobs
 	}
 }
 
+// DistributedMutexOption -
 func DistributedMutexOption(distributedMutex DistributedMutex) ServerOption {
 	return func(opts *serverOptions) {
 		opts.distributedMutex = distributedMutex

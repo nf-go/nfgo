@@ -38,14 +38,17 @@ func (opts *serverOptions) setMiddlewaresToEngine(engine *gin.Engine) {
 	engine.Use(middleWares...)
 }
 
+// ServerOption -
 type ServerOption func(*serverOptions)
 
+// MetricsServerOption -
 func MetricsServerOption(s nmetrics.Server) ServerOption {
 	return func(opts *serverOptions) {
 		opts.metricsServer = s
 	}
 }
 
+// MiddlewaresOption -
 func MiddlewaresOption(middleware ...HandlerFunc) ServerOption {
 	return func(opts *serverOptions) {
 		opts.middlewares = middleware

@@ -21,18 +21,23 @@ import (
 	"nfgo.ga/nfgo/nutil/ncrypto"
 )
 
+// Job -
 type Job interface {
 	Run(ctx context.Context)
 }
 
+// FuncJob -
 type FuncJob func(ctx context.Context)
 
+// Run -
 func (f FuncJob) Run(ctx context.Context) {
 	f(ctx)
 }
 
+// FuncJobs -
 type FuncJobs map[string]FuncJob
 
+// Jobs -
 type Jobs map[string]Job
 
 func newJobContext(jobName string) context.Context {

@@ -20,8 +20,10 @@ type serverOptions struct {
 	db *gorm.DB
 }
 
+// ServerOption -
 type ServerOption func(*serverOptions)
 
+// DBOption -
 func DBOption(db *gorm.DB) ServerOption {
 	return func(opts *serverOptions) {
 		opts.db = db

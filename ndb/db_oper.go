@@ -24,6 +24,7 @@ import (
 
 type ctxKeyDb struct{}
 
+// Transactional -
 type Transactional func(ctx context.Context, fn func(ctx context.Context) error) error
 
 // DBOper -
