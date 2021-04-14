@@ -21,6 +21,7 @@ import (
 
 	"github.com/robfig/cron/v3"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/nerrors"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/graceful"
 	"nfgo.ga/nfgo/nutil/ntypes"
@@ -112,7 +113,14 @@ func (s *jobServer) addJobs() error {
 func (s *jobServer) addJob(conf *nconf.CronJobConfig, j Job) error {
 	fn := func() {
 		ctx := newJobContext(conf.Name)
-		j.Run(ctx)
+		if err := j.Run(ctx); err != nil {
+			logger := nlog.Logger(ctx).WithError(err)
+			if bizErr, ok := err.(nerrors.BizError); ok {
+				logger.Infof("job %s completed but an biz error occurred %s", conf.Name, bizErr)
+				return
+			}
+			logger.Errorf("job %s completed but an error occurred %s", conf.Name, err)
+		}
 	}
 	var job cron.Job = cron.FuncJob(fn)
 	if s.opts.distributedMutex != nil {

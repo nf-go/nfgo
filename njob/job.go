@@ -23,15 +23,15 @@ import (
 
 // Job -
 type Job interface {
-	Run(ctx context.Context)
+	Run(ctx context.Context) error
 }
 
 // FuncJob -
-type FuncJob func(ctx context.Context)
+type FuncJob func(ctx context.Context) error
 
 // Run -
-func (f FuncJob) Run(ctx context.Context) {
-	f(ctx)
+func (f FuncJob) Run(ctx context.Context) error {
+	return f(ctx)
 }
 
 // FuncJobs -
