@@ -15,6 +15,7 @@
 package ntemplate
 
 import (
+	"io/fs"
 	"strings"
 	"text/template"
 
@@ -24,6 +25,26 @@ import (
 // TextTemplate -
 type TextTemplate struct {
 	tmpl *template.Template
+}
+
+// ParseTextTemplate -
+func ParseTextTemplate(fs fs.FS, patterns ...string) (*TextTemplate, error) {
+	tmpl, err := template.ParseFS(fs, patterns...)
+	if err != nil {
+		return nil, err
+	}
+	return &TextTemplate{
+		tmpl: tmpl,
+	}, nil
+}
+
+// MustParseTextTemplate -
+func MustParseTextTemplate(fs fs.FS, patterns ...string) *TextTemplate {
+	t, err := ParseTextTemplate(fs, patterns...)
+	if err != nil {
+		nlog.Fatal("fail to parse text template: ", err)
+	}
+	return t
 }
 
 // NewTextTemplate -
@@ -44,6 +65,18 @@ func MustNewTextTemplate(name, text string) *TextTemplate {
 		nlog.Fatal("fail to create text template: ", err)
 	}
 	return t
+}
+
+// Lookup - returns the template with the given name that is associated with t.
+// It returns nil if there is no such template or the template has no definition.
+func (t *TextTemplate) Lookup(name string) *TextTemplate {
+	tmpl := t.tmpl.Lookup(name)
+	if tmpl == nil {
+		return nil
+	}
+	return &TextTemplate{
+		tmpl: tmpl,
+	}
 }
 
 // Execute - applies the template to the specified data object

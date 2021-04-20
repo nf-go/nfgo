@@ -16,6 +16,7 @@ package ntemplate
 
 import (
 	"html/template"
+	"io/fs"
 	"strings"
 
 	"nfgo.ga/nfgo/nlog"
@@ -24,6 +25,26 @@ import (
 // HTMLTemplate -
 type HTMLTemplate struct {
 	tmpl *template.Template
+}
+
+// ParseHTMLTemplate -
+func ParseHTMLTemplate(fs fs.FS, patterns ...string) (*HTMLTemplate, error) {
+	tmpl, err := template.ParseFS(fs, patterns...)
+	if err != nil {
+		return nil, err
+	}
+	return &HTMLTemplate{
+		tmpl: tmpl,
+	}, nil
+}
+
+// MustParseHTMLTemplate -
+func MustParseHTMLTemplate(fs fs.FS, patterns ...string) *HTMLTemplate {
+	t, err := ParseHTMLTemplate(fs, patterns...)
+	if err != nil {
+		nlog.Fatal("fail to parse html template: ", err)
+	}
+	return t
 }
 
 // NewHTMLTemplate -
@@ -44,6 +65,18 @@ func MustNewHTMLTemplate(name, text string) *HTMLTemplate {
 		nlog.Fatal("fail to create html template: ", err)
 	}
 	return t
+}
+
+// Lookup returns the template with the given name that is associated with t,
+// or nil if there is no such template.
+func (t *HTMLTemplate) Lookup(name string) *HTMLTemplate {
+	tmpl := t.tmpl.Lookup(name)
+	if tmpl == nil {
+		return nil
+	}
+	return &HTMLTemplate{
+		tmpl: tmpl,
+	}
 }
 
 // Execute - applies the template to the specified data object

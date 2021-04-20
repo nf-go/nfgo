@@ -15,10 +15,34 @@
 package ntemplate
 
 import (
+	"embed"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+//go:embed html.go text.go
+var tmpl embed.FS
+
+func TestMustParseTextTemplate(t *testing.T) {
+	t.Log(tmpl)
+	textTmpl := MustParseTextTemplate(tmpl, "*.go")
+	str, err := textTmpl.ExecuteTemplate("html.go", nil)
+	a := assert.New(t)
+	a.Nil(err)
+	a.Contains(str, "type HTMLTemplate struct {")
+	tt := textTmpl.Lookup("html.go")
+	a.NotNil(tt)
+	str, err = tt.Execute(nil)
+	a.Nil(err)
+	a.Contains(str, "type HTMLTemplate struct {")
+	tt = textTmpl.Lookup("notexist.go")
+	a.Nil(tt)
+
+	str, err = textTmpl.ExecuteTemplate("text.go", nil)
+	a.Nil(err)
+	a.Contains(str, "type TextTemplate struct {")
+}
 
 func TestNewTextTemplate(t *testing.T) {
 	a := assert.New(t)

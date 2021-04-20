@@ -20,6 +20,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMustParseHtmlTemplate(t *testing.T) {
+	t.Log(tmpl)
+	htmlTmpl := MustParseHTMLTemplate(tmpl, "*.go")
+	str, err := htmlTmpl.ExecuteTemplate("html.go", nil)
+	a := assert.New(t)
+	a.Nil(err)
+	a.Contains(str, "type HTMLTemplate struct {")
+	tt := htmlTmpl.Lookup("html.go")
+	a.NotNil(tt)
+	str, err = tt.Execute(nil)
+	a.Nil(err)
+	a.Contains(str, "type HTMLTemplate struct {")
+	tt = htmlTmpl.Lookup("notexist.go")
+	a.Nil(tt)
+
+	str, err = htmlTmpl.ExecuteTemplate("text.go", nil)
+	a.Nil(err)
+	a.Contains(str, "type TextTemplate struct {")
+}
+
 func TestExecuteTemplateHTML(t *testing.T) {
 	a := assert.New(t)
 	t1, err := NewHTMLTemplate("t1", `{{- define "T1"}}ONE{{end}}

@@ -1,6 +1,6 @@
 module nfgo.ga/nfgo
 
-go 1.14
+go 1.16
 
 require (
 	github.com/FZambia/sentinel v1.1.0
