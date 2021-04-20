@@ -104,7 +104,7 @@ func (s *nfgoServer) serve() {
 
 func (s *nfgoServer) shutdown() {
 	nlog.Info("the server is going to shutdown...")
-	timeout := s.config.GraceTermination.GraceTerminationPeriod
+	timeout := s.config.App.GraceTermination.GraceTerminationPeriod
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 

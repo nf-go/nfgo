@@ -20,34 +20,39 @@ import (
 	"nfgo.ga/nfgo/nutil/ntypes"
 )
 
-func setDefaultValues(configs ...interface{ SetDefaultValues() }) {
-	for _, config := range configs {
-		if ntypes.IsNotNil(config) {
-			config.SetDefaultValues()
-		}
-	}
-}
-
 // SetDefaultValues -
 func (conf *Config) SetDefaultValues() {
-	if conf.GraceTermination == nil {
-		conf.GraceTermination = &GraceTerminationConfig{}
-	}
 	if conf.Log == nil {
-		conf.Log = &LogConfig{
-			Level:  "info",
-			Format: "json",
-		}
+		conf.Log = &LogConfig{}
 	}
-	setDefaultValues(
+	configs := []interface{ SetDefaultValues() }{
+		conf.App,
 		conf.DB,
 		conf.Redis,
 		conf.Web,
 		conf.RPC,
 		conf.CronConfig,
 		conf.Metrics,
-		conf.GraceTermination,
-	)
+	}
+	for _, c := range configs {
+		if ntypes.IsNotNil(c) {
+			c.SetDefaultValues()
+		}
+	}
+}
+
+// SetDefaultValues -
+func (conf *AppConfig) SetDefaultValues() {
+	if conf.GraceTermination == nil {
+		conf.GraceTermination = &GraceTerminationConfig{}
+	}
+	conf.GraceTermination.SetDefaultValues()
+}
+
+// SetDefaultValues -
+func (conf *LogConfig) SetDefaultValues() {
+	conf.Level = "info"
+	conf.Format = "json"
 }
 
 // SetDefaultValues -

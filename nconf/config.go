@@ -22,24 +22,24 @@ import (
 
 // Config data
 type Config struct {
-	App              *AppConfig              `yaml:"app"`
-	Log              *LogConfig              `yaml:"log"`
-	DB               *DbConfig               `yaml:"db"`
-	Redis            *RedisConfig            `yaml:"redis"`
-	Web              *WebConfig              `yaml:"web"`
-	RPC              *RPCConfig              `yaml:"rpc"`
-	CronConfig       *CronConfig             `yaml:"cron"`
-	Metrics          *MetricsConfig          `yaml:"metrics"`
-	GraceTermination *GraceTerminationConfig `yaml:"graceTermination"`
+	App        *AppConfig     `yaml:"app"`
+	Log        *LogConfig     `yaml:"log"`
+	DB         *DbConfig      `yaml:"db"`
+	Redis      *RedisConfig   `yaml:"redis"`
+	Web        *WebConfig     `yaml:"web"`
+	RPC        *RPCConfig     `yaml:"rpc"`
+	CronConfig *CronConfig    `yaml:"cron"`
+	Metrics    *MetricsConfig `yaml:"metrics"`
 }
 
 // AppConfig -
 type AppConfig struct {
-	Group      string    `yaml:"group"`
-	Name       string    `yaml:"name"`
-	Profile    string    `yaml:"profile"`
-	GOMAXPROCS int       `yaml:"goMaxProcs"`
-	Ext        ExtConfig `yaml:"ext"`
+	Group            string                  `yaml:"group"`
+	Name             string                  `yaml:"name"`
+	Profile          string                  `yaml:"profile"`
+	GOMAXPROCS       int                     `yaml:"goMaxProcs"`
+	Ext              ExtConfig               `yaml:"ext"`
+	GraceTermination *GraceTerminationConfig `yaml:"graceTermination"`
 }
 
 // IsProfileLocal -
