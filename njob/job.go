@@ -17,7 +17,11 @@ package njob
 import (
 	"context"
 
+	"github.com/robfig/cron/v3"
+	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/ncontext"
+	"nfgo.ga/nfgo/nerrors"
+	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/ncrypto"
 )
 
@@ -48,4 +52,19 @@ func newJobContext(jobName string) context.Context {
 
 	ctx := context.Background()
 	return ncontext.WithMDC(ctx, mdc)
+}
+
+func newRobfigCronJob(conf *nconf.CronJobConfig, job Job) cron.Job {
+	fn := func() {
+		ctx := newJobContext(conf.Name)
+		if err := job.Run(ctx); err != nil {
+			logger := nlog.Logger(ctx).WithError(err)
+			if bizErr, ok := err.(nerrors.BizError); ok {
+				logger.Infof("job %s completed but an biz error occurred %s", conf.Name, bizErr)
+				return
+			}
+			logger.Errorf("job %s completed but an error occurred %s", conf.Name, err)
+		}
+	}
+	return cron.FuncJob(fn)
 }
