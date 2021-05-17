@@ -19,17 +19,19 @@ import (
 	"io/fs"
 	"strings"
 
+	"github.com/Masterminds/sprig/v3"
 	"nfgo.ga/nfgo/nlog"
 )
 
-// HTMLTemplate -
+// HTMLTemplate - HTMLTemplate is the representation of a parsed html template,
+// and add the sprig(http://masterminds.github.io/sprig/) functions to template's function map.
 type HTMLTemplate struct {
 	tmpl *template.Template
 }
 
 // ParseHTMLTemplate -
 func ParseHTMLTemplate(fs fs.FS, patterns ...string) (*HTMLTemplate, error) {
-	tmpl, err := template.ParseFS(fs, patterns...)
+	tmpl, err := template.New("$base").Funcs(sprig.FuncMap()).ParseFS(fs, patterns...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +51,7 @@ func MustParseHTMLTemplate(fs fs.FS, patterns ...string) *HTMLTemplate {
 
 // NewHTMLTemplate -
 func NewHTMLTemplate(name, text string) (*HTMLTemplate, error) {
-	tmpl, err := template.New(name).Parse(text)
+	tmpl, err := template.New(name).Funcs(sprig.FuncMap()).Parse(text)
 	if err != nil {
 		return nil, err
 	}

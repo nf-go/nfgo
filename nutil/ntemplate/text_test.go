@@ -58,11 +58,11 @@ func TestNewTextTemplate(t *testing.T) {
 
 func TestExecute(t *testing.T) {
 	a := assert.New(t)
-	t1, err := NewTextTemplate("t1", `hello {{  . }}`)
+	t1, err := NewTextTemplate("t1", `hello {{  . }} {{ add 1 2 3 }}`)
 	a.Nil(err)
 	str, err := t1.Execute("world")
 	a.Nil(err)
-	a.Equal("hello world", str)
+	a.Equal("hello world 6", str)
 }
 
 func TestExecuteTemplate(t *testing.T) {

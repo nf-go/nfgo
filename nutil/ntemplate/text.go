@@ -19,17 +19,19 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"nfgo.ga/nfgo/nlog"
 )
 
-// TextTemplate -
+// TextTemplate - TextTemplate is the representation of a parsed text template,
+// and add the sprig(http://masterminds.github.io/sprig/) functions to template's function map.
 type TextTemplate struct {
 	tmpl *template.Template
 }
 
 // ParseTextTemplate -
 func ParseTextTemplate(fs fs.FS, patterns ...string) (*TextTemplate, error) {
-	tmpl, err := template.ParseFS(fs, patterns...)
+	tmpl, err := template.New("$base").Funcs(sprig.TxtFuncMap()).ParseFS(fs, patterns...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +51,7 @@ func MustParseTextTemplate(fs fs.FS, patterns ...string) *TextTemplate {
 
 // NewTextTemplate -
 func NewTextTemplate(name, text string) (*TextTemplate, error) {
-	tmpl, err := template.New(name).Parse(text)
+	tmpl, err := template.New(name).Funcs(sprig.TxtFuncMap()).Parse(text)
 	if err != nil {
 		return nil, err
 	}
