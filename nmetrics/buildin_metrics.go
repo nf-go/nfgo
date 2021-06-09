@@ -17,15 +17,25 @@ package nmetrics
 import (
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/nutil/ntypes"
 )
 
-func (s *server) regitserDBCollector(config *nconf.Config) error {
-	if config.DB != nil && s.opts != nil && s.opts.db != nil {
-		sqldb, err := s.opts.db.DB()
-		if err != nil {
+func (s *server) regitserBuildinCollector(config *nconf.Config) error {
+	conf := config.Metrics
+	if ntypes.BoolValue(conf.BuildInfoCollector) {
+		if err := s.registry.Register(collectors.NewBuildInfoCollector()); err != nil {
 			return err
 		}
-		return s.registry.Register(collectors.NewDBStatsCollector(sqldb, config.DB.Database))
+	}
+	if ntypes.BoolValue(conf.ProcessCollector) {
+		if err := s.registry.Register(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{})); err != nil {
+			return err
+		}
+	}
+	if ntypes.BoolValue(conf.GoCollector) {
+		if err := s.registry.Register(collectors.NewGoCollector()); err != nil {
+			return err
+		}
 	}
 	return nil
 }

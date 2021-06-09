@@ -97,10 +97,12 @@ type server struct {
 	registry             *prometheus.Registry
 	grpcMetricsCollector *grpc_prometheus.ServerMetrics
 	webMetricsCollector  *webMetrics
-	dbMetricsCollector   *dbMetrics
 }
 
 func (s *server) registerCollectors(config *nconf.Config) error {
+	if err := s.regitserBuildinCollector(config); err != nil {
+		return err
+	}
 	if err := s.registerRPCCollector(config); err != nil {
 		return err
 	}
@@ -115,22 +117,11 @@ func (s *server) Shutdown(ctx context.Context) error {
 }
 
 func (s *server) Serve() error {
-
-	if s.opts != nil {
-		db := s.opts.db
-		if db != nil {
-			if err := db.Use(s.gormPrometheusPlugin()); err != nil {
-				return err
-			}
-		}
-	}
-
 	nlog.Infof("the prometheus metrics server is started and serving on http://%s%s", s.httpServer.Addr, s.metricsConfig.MetricsPath)
 	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		nlog.Error("the prometheus metrics server is stoped with error ", err)
 		return err
 	}
-
 	return nil
 }
 

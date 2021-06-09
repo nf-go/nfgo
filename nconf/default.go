@@ -145,6 +145,15 @@ func (conf *MetricsConfig) SetDefaultValues() {
 	if conf.MetricsPath == "" {
 		conf.MetricsPath = "/metrics"
 	}
+	if conf.BuildInfoCollector == nil {
+		conf.BuildInfoCollector = ntypes.Bool(false)
+	}
+	if conf.ProcessCollector == nil {
+		conf.ProcessCollector = ntypes.Bool(false)
+	}
+	if conf.GoCollector == nil {
+		conf.GoCollector = ntypes.Bool(false)
+	}
 }
 
 // SetDefaultValues -

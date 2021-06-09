@@ -166,9 +166,12 @@ type RedisClusterConfig struct {
 
 // MetricsConfig -
 type MetricsConfig struct {
-	Host        string `yaml:"host"`
-	Port        int32  `yaml:"port"`
-	MetricsPath string `yaml:"metricsPath"`
+	Host               string `yaml:"host"`
+	Port               int32  `yaml:"port"`
+	MetricsPath        string `yaml:"metricsPath"`
+	BuildInfoCollector *bool  `yaml:"buildInfoCollector"`
+	ProcessCollector   *bool  `yaml:"processCollector"`
+	GoCollector        *bool  `yaml:"goCollector"`
 }
 
 // GraceTerminationConfig -
