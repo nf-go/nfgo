@@ -69,7 +69,7 @@ func (s *nfgoServer) RegisterOnShutdown(f func() error) {
 	s.mu.Unlock()
 }
 
-// Serve -
+// MustServe -
 func (s *nfgoServer) MustServe() {
 	s.autoSetMaxProcs()
 	s.serve()
