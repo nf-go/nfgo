@@ -22,6 +22,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"nfgo.ga/nfgo/nconf"
 	"nfgo.ga/nfgo/nlog"
 	"nfgo.ga/nfgo/nutil/ntypes"
@@ -97,7 +98,7 @@ func dialConn(config *nconf.RPCClientConfig) (*grpc.ClientConn, error) {
 		),
 	}
 	if ntypes.BoolValue(config.Plaintext) {
-		dialOptions = append(dialOptions, grpc.WithInsecure())
+		dialOptions = append(dialOptions, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
 		creds := credentials.NewTLS(&tls.Config{
 			InsecureSkipVerify: config.InsecureSkipVerify,

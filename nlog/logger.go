@@ -109,6 +109,7 @@ func newPkgLogger(logger *nlogger) *nlogger {
 }
 
 func (l *nlogger) IsLevelEnabled(level Level) bool {
+	//nolint:errcheck // ignore errcheck!
 	l.Sync()
 	return l.Config.Level.Enabled(level.unWrap())
 }
@@ -208,7 +209,9 @@ func SetLevel(level Level) {
 // Applications should take care to call Sync before exiting.
 func Sync() error {
 	// ignore "sync /dev/stderr: inappropriate ioctl for device" error
+	//nolint:errcheck // ignore errcheck!
 	logger.SugaredLogger.Sync()
+	//nolint:errcheck // ignore errcheck!
 	pkgLogger.SugaredLogger.Sync()
 	return nil
 }

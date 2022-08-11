@@ -16,7 +16,7 @@ package web
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -59,6 +59,7 @@ func (c *Context) Success(data interface{}) {
 
 // Fail - response and render the error by json
 func (c *Context) Fail(err error) {
+	//nolint:errcheck // ignore errcheck!
 	c.Error(err)
 
 	// handle biz error
@@ -101,8 +102,7 @@ func (c *Context) FormFileBytes(name string) ([]byte, string, error) {
 		return nil, filename, err
 	}
 	defer src.Close()
-
-	bytes, err := ioutil.ReadAll(src)
+	bytes, err := io.ReadAll(src)
 	return bytes, filename, err
 }
 

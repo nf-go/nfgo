@@ -17,7 +17,6 @@ package web
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 
 	"nfgo.ga/nfgo/ncontext"
 	"nfgo.ga/nfgo/nlog"
@@ -59,8 +58,8 @@ func Logging() HandlerFunc {
 		} else {
 			var buf bytes.Buffer
 			teeReader := io.TeeReader(c.Request.Body, &buf)
-			body, _ := ioutil.ReadAll(teeReader)
-			c.Request.Body = ioutil.NopCloser(&buf)
+			body, _ := io.ReadAll(teeReader)
+			c.Request.Body = io.NopCloser(&buf)
 			nlog.Logger(c).WithField("req", c.Request.URL.RawQuery+" "+string(body)).Info()
 		}
 
