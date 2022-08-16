@@ -30,6 +30,7 @@ type BizError interface {
 	error
 	Code() int
 	Msg() string
+	New(message string) BizError
 }
 
 // NewBizError -
@@ -41,6 +42,10 @@ func NewBizError(code int16, msg string) BizError {
 type bizError struct {
 	code int16
 	msg  string
+}
+
+func (e *bizError) New(message string) BizError {
+	return NewBizError(e.code, e.msg+": "+message)
 }
 
 func (e *bizError) Error() string {
