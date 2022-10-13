@@ -3,7 +3,7 @@ module nfgo.ga/nfgo
 go 1.18
 
 require (
-	github.com/FZambia/sentinel v1.1.0
+	github.com/FZambia/sentinel v1.1.1
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/gin-gonic/gin v1.8.1
 	github.com/gomodule/redigo v1.8.9
@@ -15,14 +15,14 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.8.0
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a
-	github.com/swaggo/gin-swagger v1.5.2
+	github.com/swaggo/gin-swagger v1.5.3
 	go.uber.org/automaxprocs v1.5.1
 	go.uber.org/multierr v1.8.0
-	go.uber.org/zap v1.22.0
-	google.golang.org/grpc v1.48.0
+	go.uber.org/zap v1.23.0
+	google.golang.org/grpc v1.50.0
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/driver/mysql v1.3.5
-	gorm.io/gorm v1.23.8
+	gorm.io/driver/mysql v1.4.1
+	gorm.io/gorm v1.24.0
 )
 
 require (
