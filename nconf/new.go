@@ -44,6 +44,17 @@ func MustNewConfigCustom(bytes []byte, customConfig interface{ SetConfig(config 
 		}
 	}
 
+	// secret config value decrypt
+	if secretsConfig, ok := customConfig.(SecretsConfig); ok {
+		secretKey = secretsConfig.SecretKey()
+		if err := config.decryptSecrets(); err != nil {
+			log.Fatal(err)
+		}
+		if err := secretsConfig.DecryptSecrets(); err != nil {
+			log.Fatal()
+		}
+	}
+
 	return config
 }
 
