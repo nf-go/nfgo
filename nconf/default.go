@@ -69,6 +69,9 @@ func (conf *DbConfig) SetDefaultValues() {
 	if conf.Charset == "" {
 		conf.Charset = "utf8mb4"
 	}
+	if conf.SlowQueryThreshold == 0 {
+		conf.SlowQueryThreshold = 5 * time.Second
+	}
 }
 
 // SetDefaultValues -

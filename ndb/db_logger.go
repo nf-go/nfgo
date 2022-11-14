@@ -46,13 +46,8 @@ func newLogger(config *nconf.DbConfig) *dbLogger {
 		logLevel = logger.Error
 	}
 
-	slowThreshold := config.SlowQueryThreshold
-	if slowThreshold == 0 {
-		slowThreshold = 5 * time.Second
-	}
-
 	return &dbLogger{
-		SlowThreshold: slowThreshold,
+		SlowThreshold: config.SlowQueryThreshold,
 		LogLevel:      logLevel,
 	}
 }
