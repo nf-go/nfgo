@@ -100,3 +100,8 @@ func (g *routerGroup) Static(relativePath string, root string) {
 func (g *routerGroup) StaticFS(relativePath string, fs http.FileSystem) {
 	g.ginGroup.StaticFS(relativePath, fs)
 }
+
+// RouterRegistrar
+type RouterRegistrar interface {
+	RegisterRoutes(rg RouterGroup)
+}
