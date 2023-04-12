@@ -15,7 +15,7 @@
 package nconf
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 
@@ -74,7 +74,7 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 		log.Fatal(err)
 	}
 
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	file.Close()
 	if err != nil {
 		log.Fatal(err)
