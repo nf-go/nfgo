@@ -16,8 +16,10 @@ package web
 
 import (
 	"net/http"
+	"reflect"
 
 	"github.com/gin-gonic/gin"
+	"nfgo.ga/nfgo/nlog"
 )
 
 // RouterGroup -
@@ -104,4 +106,31 @@ func (g *routerGroup) StaticFS(relativePath string, fs http.FileSystem) {
 // RouterRegistrar
 type RouterRegistrar interface {
 	RegisterRoutes(rg RouterGroup)
+}
+
+func ReflectToRouterRegistrars(iface interface{}) []RouterRegistrar {
+	var registrars []RouterRegistrar
+	v := reflect.ValueOf(iface)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		nlog.Warn("%+v is not a struct or struct pointer.", iface)
+		return registrars
+	}
+	for i := 0; i < v.NumField(); i++ {
+		fieldValue := v.Field(i)
+		if !fieldValue.CanInterface() {
+			nlog.Warn("%+v can't be used without panicking.", fieldValue)
+			continue
+		}
+		field := fieldValue.Interface()
+		registrar, ok := field.(RouterRegistrar)
+		if !ok {
+			nlog.Warn("%+v is not a RouterRegistrar.", field)
+			continue
+		}
+		registrars = append(registrars, registrar)
+	}
+	return registrars
 }
