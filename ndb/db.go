@@ -77,8 +77,8 @@ func NewDB(dbConfig *nconf.DbConfig, opt ...DBOption) (*gorm.DB, error) {
 	}
 	sqlDB.SetMaxIdleConns(int(dbConfig.MaxIdle))
 	sqlDB.SetMaxOpenConns(int(dbConfig.MaxOpen))
-	sqlDB.SetConnMaxLifetime(dbConfig.MaxIdleTime)
-	sqlDB.SetConnMaxIdleTime(dbConfig.MaxLifetime)
+	sqlDB.SetConnMaxLifetime(dbConfig.MaxLifetime)
+	sqlDB.SetConnMaxIdleTime(dbConfig.MaxIdleTime)
 
 	return db, nil
 }
