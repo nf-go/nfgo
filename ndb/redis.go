@@ -20,10 +20,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/FZambia/sentinel"
+	sentinel "github.com/FZambia/sentinel/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/mna/redisc"
 	"nfgo.ga/nfgo/nconf"
+	"nfgo.ga/nfgo/nerrors"
 	"nfgo.ga/nfgo/nlog"
 )
 
@@ -134,7 +135,11 @@ func newSentinelRedisPool(redisConfig *nconf.RedisConfig) (*redis.Pool, error) {
 
 	if redisConfig.TestOnBorrow {
 		redisPool.TestOnBorrow = func(c redis.Conn, t time.Time) error {
-			if !sentinel.TestRole(c, "master") {
+			ok, err := sentinel.TestRole(c, "master")
+			if err != nil {
+				return nerrors.WithStack(err)
+			}
+			if !ok {
 				return errors.New("role check failed")
 			}
 			return nil
