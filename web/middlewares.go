@@ -18,10 +18,10 @@ import (
 	"bytes"
 	"io"
 
-	"nfgo.ga/nfgo/ncontext"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/nconst"
-	"nfgo.ga/nfgo/nutil/ncrypto"
+	"github.com/nf-go/nfgo/ncontext"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/nconst"
+	"github.com/nf-go/nfgo/nutil/ncrypto"
 )
 
 // BindMDC - BindMDC MiddleWare

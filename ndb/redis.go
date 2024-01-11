@@ -23,9 +23,9 @@ import (
 	sentinel "github.com/FZambia/sentinel/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/mna/redisc"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nerrors"
-	"nfgo.ga/nfgo/nlog"
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nerrors"
+	"github.com/nf-go/nfgo/nlog"
 )
 
 // RedisPool -

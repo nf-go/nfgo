@@ -18,8 +18,8 @@ import (
 	"context"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/nf-go/nfgo/nconf"
 	"google.golang.org/grpc"
-	"nfgo.ga/nfgo/nconf"
 )
 
 func (s *server) registerRPCCollector(config *nconf.Config) error {

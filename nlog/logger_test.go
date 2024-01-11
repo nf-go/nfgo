@@ -18,7 +18,7 @@ import (
 	"context"
 	"testing"
 
-	"nfgo.ga/nfgo/nconf"
+	"github.com/nf-go/nfgo/nconf"
 )
 
 func TestInitLogger(t *testing.T) {

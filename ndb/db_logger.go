@@ -19,11 +19,11 @@ import (
 	"errors"
 	"time"
 
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nlog"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nlog"
 )
 
 // https://github.com/go-gorm/gorm/blob/master/logger/logger.go

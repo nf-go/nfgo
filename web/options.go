@@ -16,7 +16,7 @@ package web
 
 import (
 	"github.com/gin-gonic/gin"
-	"nfgo.ga/nfgo/nmetrics"
+	"github.com/nf-go/nfgo/nmetrics"
 )
 
 type serverOptions struct {

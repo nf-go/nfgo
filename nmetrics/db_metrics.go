@@ -15,8 +15,8 @@
 package nmetrics
 
 import (
+	"github.com/nf-go/nfgo/nconf"
 	"github.com/prometheus/client_golang/prometheus/collectors"
-	"nfgo.ga/nfgo/nconf"
 )
 
 func (s *server) regitserDBCollector(config *nconf.Config) error {

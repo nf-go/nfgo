@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/sprig/v3"
-	"nfgo.ga/nfgo/nlog"
+	"github.com/nf-go/nfgo/nlog"
 )
 
 // HTMLTemplate - HTMLTemplate is the representation of a parsed html template,

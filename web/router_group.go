@@ -19,7 +19,7 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"nfgo.ga/nfgo/nlog"
+	"github.com/nf-go/nfgo/nlog"
 )
 
 // RouterGroup -

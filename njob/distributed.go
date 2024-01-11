@@ -18,11 +18,11 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/ndb"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/ncrypto"
 	"github.com/robfig/cron/v3"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/ndb"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/ncrypto"
 )
 
 // DistributedMutex -

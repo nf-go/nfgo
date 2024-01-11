@@ -18,9 +18,9 @@ import (
 	"errors"
 	"fmt"
 
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/ntypes"
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/ntypes"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

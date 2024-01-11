@@ -21,10 +21,10 @@ import (
 	"net"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/graceful"
-	"nfgo.ga/nfgo/nutil/ntypes"
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/graceful"
+	"github.com/nf-go/nfgo/nutil/ntypes"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"

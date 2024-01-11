@@ -22,12 +22,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/graceful"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/graceful"
 )
 
 // Server -

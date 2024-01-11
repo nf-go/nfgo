@@ -17,12 +17,12 @@ package njob
 import (
 	"context"
 
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/ncontext"
+	"github.com/nf-go/nfgo/nerrors"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/ncrypto"
 	"github.com/robfig/cron/v3"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/ncontext"
-	"nfgo.ga/nfgo/nerrors"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/ncrypto"
 )
 
 // Job -

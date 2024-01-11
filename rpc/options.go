@@ -15,9 +15,9 @@
 package rpc
 
 import (
+	"github.com/nf-go/nfgo/nmetrics"
+	"github.com/nf-go/nfgo/rpc/interceptor"
 	"google.golang.org/grpc"
-	"nfgo.ga/nfgo/nmetrics"
-	"nfgo.ga/nfgo/rpc/interceptor"
 )
 
 type serverOptions struct {

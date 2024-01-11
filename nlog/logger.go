@@ -17,9 +17,9 @@ package nlog
 import (
 	"context"
 
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/ncontext"
 	"go.uber.org/zap"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/ncontext"
 )
 
 // NLogger -

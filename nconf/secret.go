@@ -3,9 +3,9 @@ package nconf
 import (
 	"strings"
 
-	"nfgo.ga/nfgo/nerrors"
-	"nfgo.ga/nfgo/nutil/ncrypto"
-	"nfgo.ga/nfgo/nutil/ntypes"
+	"github.com/nf-go/nfgo/nerrors"
+	"github.com/nf-go/nfgo/nutil/ncrypto"
+	"github.com/nf-go/nfgo/nutil/ntypes"
 )
 
 var secretKey string

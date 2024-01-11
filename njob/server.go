@@ -19,11 +19,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/graceful"
+	"github.com/nf-go/nfgo/nutil/ntypes"
 	"github.com/robfig/cron/v3"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/graceful"
-	"nfgo.ga/nfgo/nutil/ntypes"
 )
 
 // Server -

@@ -18,10 +18,10 @@ import (
 	"context"
 	"runtime/debug"
 
+	"github.com/nf-go/nfgo/nlog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"nfgo.ga/nfgo/nlog"
 )
 
 // RecoverUnaryServerInterceptor -

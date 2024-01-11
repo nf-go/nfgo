@@ -1,4 +1,4 @@
-module nfgo.ga/nfgo
+module github.com/nf-go/nfgo
 
 go 1.19
 

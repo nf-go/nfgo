@@ -15,9 +15,9 @@
 package nmetrics
 
 import (
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nutil/ntypes"
 	"github.com/prometheus/client_golang/prometheus/collectors"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nutil/ntypes"
 )
 
 func (s *server) regitserBuildinCollector(config *nconf.Config) error {

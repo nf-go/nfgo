@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"nfgo.ga/nfgo/nerrors"
+	"github.com/nf-go/nfgo/nerrors"
 )
 
 const (

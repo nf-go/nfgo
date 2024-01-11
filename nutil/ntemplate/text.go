@@ -20,7 +20,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"nfgo.ga/nfgo/nlog"
+	"github.com/nf-go/nfgo/nlog"
 )
 
 // TextTemplate - TextTemplate is the representation of a parsed text template,

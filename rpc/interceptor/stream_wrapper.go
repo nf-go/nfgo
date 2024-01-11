@@ -19,11 +19,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/nf-go/nfgo/nlog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"nfgo.ga/nfgo/nlog"
 )
 
 const (

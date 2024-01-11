@@ -23,11 +23,11 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/graceful"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/graceful"
 )
 
 // Server -

@@ -18,9 +18,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/nf-go/nfgo/nerrors"
+	"github.com/nf-go/nfgo/nlog"
 	"google.golang.org/grpc"
-	"nfgo.ga/nfgo/nerrors"
-	"nfgo.ga/nfgo/nlog"
 )
 
 // LoggingUnaryServerInterceptor -

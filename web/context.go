@@ -23,11 +23,11 @@ import (
 	"strings"
 	"time"
 
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/nconst"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/nconst"
 
 	"github.com/gin-gonic/gin"
-	"nfgo.ga/nfgo/nerrors"
+	"github.com/nf-go/nfgo/nerrors"
 )
 
 // Context -

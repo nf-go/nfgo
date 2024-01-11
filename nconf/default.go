@@ -17,7 +17,7 @@ package nconf
 import (
 	"time"
 
-	"nfgo.ga/nfgo/nutil/ntypes"
+	"github.com/nf-go/nfgo/nutil/ntypes"
 )
 
 // SetDefaultValues -

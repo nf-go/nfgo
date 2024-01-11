@@ -21,9 +21,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/nf-go/nfgo/nconf"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"nfgo.ga/nfgo/nconf"
 )
 
 func newDefaultZapConfig() *zap.Config {

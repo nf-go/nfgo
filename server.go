@@ -23,11 +23,11 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nerrors"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/graceful"
 	"go.uber.org/automaxprocs/maxprocs"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nerrors"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/graceful"
 )
 
 // Server -

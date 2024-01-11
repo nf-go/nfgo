@@ -19,8 +19,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nf-go/nfgo/nconf"
 	"github.com/prometheus/client_golang/prometheus"
-	"nfgo.ga/nfgo/nconf"
 )
 
 func (s *server) regitserWebCollector(config *nconf.Config) error {

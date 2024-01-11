@@ -20,13 +20,13 @@ import (
 
 	"context"
 
+	"github.com/nf-go/nfgo/nconf"
+	"github.com/nf-go/nfgo/nlog"
+	"github.com/nf-go/nfgo/nutil/ntypes"
+	"github.com/nf-go/nfgo/rpc/interceptor"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
-	"nfgo.ga/nfgo/nconf"
-	"nfgo.ga/nfgo/nlog"
-	"nfgo.ga/nfgo/nutil/ntypes"
-	"nfgo.ga/nfgo/rpc/interceptor"
 )
 
 // ClientConns -

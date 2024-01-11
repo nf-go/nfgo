@@ -17,9 +17,9 @@ package interceptor
 import (
 	"context"
 
-	"nfgo.ga/nfgo/ncontext"
-	"nfgo.ga/nfgo/nutil/nconst"
-	"nfgo.ga/nfgo/nutil/ncrypto"
+	"github.com/nf-go/nfgo/ncontext"
+	"github.com/nf-go/nfgo/nutil/nconst"
+	"github.com/nf-go/nfgo/nutil/ncrypto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

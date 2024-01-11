@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"nfgo.ga/nfgo/nlog"
+	"github.com/nf-go/nfgo/nlog"
 )
 
 var (

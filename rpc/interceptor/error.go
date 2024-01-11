@@ -17,11 +17,11 @@ package interceptor
 import (
 	"context"
 
+	"github.com/nf-go/nfgo/nerrors"
+	"github.com/nf-go/nfgo/nlog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"nfgo.ga/nfgo/nerrors"
-	"nfgo.ga/nfgo/nlog"
 )
 
 // ErrorHandleUnaryServerInterceptor -
