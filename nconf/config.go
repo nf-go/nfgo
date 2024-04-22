@@ -87,10 +87,16 @@ type LogConfig struct {
 
 // WebConfig -
 type WebConfig struct {
-	Host               string         `yaml:"host"`
-	Port               int32          `yaml:"port"`
-	Swagger            *SwaggerConfig `yaml:"swagger"`
-	MaxMultipartMemory int64          `yaml:"maxMultipartMemory"`
+	Host               string              `yaml:"host"`
+	Port               int32               `yaml:"port"`
+	Swagger            *SwaggerConfig      `yaml:"swagger"`
+	MaxMultipartMemory int64               `yaml:"maxMultipartMemory"`
+	SensitiveURLPaths  map[string]struct{} `yaml:"sensitiveURLPaths"`
+}
+
+func (conf *WebConfig) IsSensitiveURLPath(path string) bool {
+	_, ok := conf.SensitiveURLPaths[path]
+	return ok
 }
 
 // SwaggerConfig -

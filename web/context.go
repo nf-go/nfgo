@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nf-go/nfgo/nconf"
 	"github.com/nf-go/nfgo/nlog"
 	"github.com/nf-go/nfgo/nutil/nconst"
 
@@ -33,6 +34,7 @@ import (
 // Context -
 type Context struct {
 	*gin.Context
+	webConfig *nconf.WebConfig
 }
 
 // APIResult -

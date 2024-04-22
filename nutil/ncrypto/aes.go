@@ -17,9 +17,9 @@ package ncrypto
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"math/rand"
 
 	"github.com/nf-go/nfgo/nerrors"
 )

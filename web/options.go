@@ -16,6 +16,7 @@ package web
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/nf-go/nfgo/nconf"
 	"github.com/nf-go/nfgo/nmetrics"
 )
 
@@ -24,15 +25,15 @@ type serverOptions struct {
 	middlewares   []HandlerFunc
 }
 
-func (opts *serverOptions) setMiddlewaresToEngine(engine *gin.Engine) {
+func (opts *serverOptions) setMiddlewaresToEngine(engine *gin.Engine, conf *nconf.WebConfig) {
 	middleWares := []gin.HandlerFunc{gin.Recovery()}
 	if opts.metricsServer != nil {
 		middleWares = append(middleWares, opts.metricsServer.WebMetricsMiddleware())
 	}
-	middleWares = append(middleWares, BindMDC().WrapHandler(), Logging().WrapHandler())
+	middleWares = append(middleWares, BindMDC().WrapHandler(conf), Logging().WrapHandler(conf))
 	if len(opts.middlewares) > 0 {
 		for _, m := range opts.middlewares {
-			middleWares = append(middleWares, m.WrapHandler())
+			middleWares = append(middleWares, m.WrapHandler(conf))
 		}
 	}
 	engine.Use(middleWares...)

@@ -64,9 +64,9 @@ func (s *server) Shutdown(ctx context.Context) error {
 }
 
 func (s *server) Group(relativePath string, handlers ...HandlerFunc) RouterGroup {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(s.config.Web, handlers...)
 	ginGroup := s.engine.Group(relativePath, ginHandlers...)
-	return &routerGroup{ginGroup: ginGroup}
+	return &routerGroup{ginGroup: ginGroup, conf: s.config.Web}
 }
 
 func (s *server) configSwagger() error {
@@ -118,7 +118,7 @@ func NewServer(config *nconf.Config, opt ...ServerOption) (Server, error) {
 	for _, o := range opt {
 		o(opts)
 	}
-	opts.setMiddlewaresToEngine(engine)
+	opts.setMiddlewaresToEngine(engine, webConfig)
 
 	// http server
 	httpServer := &http.Server{
