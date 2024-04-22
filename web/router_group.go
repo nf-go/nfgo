@@ -19,6 +19,7 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nf-go/nfgo/nconf"
 	"github.com/nf-go/nfgo/nlog"
 )
 
@@ -30,62 +31,63 @@ type RouterGroup interface {
 
 type routerGroup struct {
 	ginGroup *gin.RouterGroup
+	conf     *nconf.WebConfig
 }
 
 func (g *routerGroup) Group(relativePath string, handlers ...HandlerFunc) RouterGroup {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	ginGroup := g.ginGroup.Group(relativePath, ginHandlers...)
-	return &routerGroup{ginGroup: ginGroup}
+	return &routerGroup{ginGroup: ginGroup, conf: g.conf}
 }
 
 func (g *routerGroup) Use(handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.Use(ginHandlers...)
 }
 
 func (g *routerGroup) Handle(httpMethod, relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.Handle(httpMethod, relativePath, ginHandlers...)
 }
 
 func (g *routerGroup) Any(relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.Any(relativePath, ginHandlers...)
 }
 
 func (g *routerGroup) GET(relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.GET(relativePath, ginHandlers...)
 }
 
 func (g *routerGroup) POST(relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.POST(relativePath, ginHandlers...)
 }
 
 func (g *routerGroup) DELETE(relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.DELETE(relativePath, ginHandlers...)
 }
 
 func (g *routerGroup) PATCH(relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.PATCH(relativePath, ginHandlers...)
 }
 
 func (g *routerGroup) PUT(relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.PUT(relativePath, ginHandlers...)
 }
 
 func (g *routerGroup) OPTIONS(relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.OPTIONS(relativePath, ginHandlers...)
 
 }
 
 func (g *routerGroup) HEAD(relativePath string, handlers ...HandlerFunc) {
-	ginHandlers := toGinHandlers(handlers...)
+	ginHandlers := toGinHandlers(g.conf, handlers...)
 	g.ginGroup.HEAD(relativePath, ginHandlers...)
 
 }

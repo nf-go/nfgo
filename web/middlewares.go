@@ -53,7 +53,9 @@ func BindMDC() HandlerFunc {
 // Logging -
 func Logging() HandlerFunc {
 	return func(c *Context) {
-		if c.IsMultipartReq() {
+		if c.webConfig.IsSensitiveURLPath(c.Request.URL.Path) {
+			nlog.Logger(c).WithField("req", "sensitive ******").Info()
+		} else if c.IsMultipartReq() {
 			nlog.Logger(c).WithField("req", c.Request.URL.RawQuery).Info()
 		} else {
 			var buf bytes.Buffer
@@ -62,7 +64,6 @@ func Logging() HandlerFunc {
 			c.Request.Body = io.NopCloser(&buf)
 			nlog.Logger(c).WithField("req", c.Request.URL.RawQuery+" "+string(body)).Info()
 		}
-
 		c.Next()
 	}
 }

@@ -14,25 +14,29 @@
 
 package web
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/nf-go/nfgo/nconf"
+)
 
 // HandlerFunc -
 type HandlerFunc func(c *Context)
 
 // WrapHandler -
-func (h HandlerFunc) WrapHandler() gin.HandlerFunc {
+func (h HandlerFunc) WrapHandler(conf *nconf.WebConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := &Context{
-			c,
+			Context:   c,
+			webConfig: conf,
 		}
 		h(ctx)
 	}
 }
 
-func toGinHandlers(handlers ...HandlerFunc) []gin.HandlerFunc {
+func toGinHandlers(conf *nconf.WebConfig, handlers ...HandlerFunc) []gin.HandlerFunc {
 	ginHandlers := make([]gin.HandlerFunc, 0, len(handlers))
 	for _, h := range handlers {
-		ginHandlers = append(ginHandlers, h.WrapHandler())
+		ginHandlers = append(ginHandlers, h.WrapHandler(conf))
 	}
 	return ginHandlers
 }

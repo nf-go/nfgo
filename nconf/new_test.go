@@ -56,6 +56,9 @@ web:
   swagger:
     enabled: true
     url: http://localhost:8080/apidoc/doc.json
+  sensitiveURLPaths:
+    "/login": {}
+    "/api/secret": {}
 metrics:
   port: 8079
 cron:
@@ -100,4 +103,6 @@ bar: b1
 	someIds, ok := ext["someIds"].([]interface{})
 	a.True(ok)
 	a.Equal([]interface{}{1, 2}, someIds)
+	_, ok = config.Web.SensitiveURLPaths["/login"]
+	a.True(ok)
 }
