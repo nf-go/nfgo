@@ -60,6 +60,7 @@ func (r *redisOperImpl) Conn() redis.Conn {
 
 func (r *redisOperImpl) GetString(key string) (string, error) {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	val, err := redis.String(conn.Do("GET", key))
 	if err == redis.ErrNil {
@@ -70,6 +71,7 @@ func (r *redisOperImpl) GetString(key string) (string, error) {
 
 func (r *redisOperImpl) SetString(key, value string) error {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	_, err := conn.Do("SET", key, value)
 	return err
@@ -77,6 +79,7 @@ func (r *redisOperImpl) SetString(key, value string) error {
 
 func (r *redisOperImpl) SetStringOpts(key, value string, setnx bool, setxx bool, ttl time.Duration) error {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	args := []interface{}{key, value}
 	if ttl > time.Millisecond {
@@ -94,6 +97,7 @@ func (r *redisOperImpl) SetStringOpts(key, value string, setnx bool, setxx bool,
 
 func (r *redisOperImpl) GetObject(key string, model interface{}) (interface{}, error) {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	data, err := redis.Bytes(conn.Do("GET", key))
 	if err == redis.ErrNil {
@@ -108,6 +112,7 @@ func (r *redisOperImpl) GetObject(key string, model interface{}) (interface{}, e
 
 func (r *redisOperImpl) SetObject(key string, value interface{}) error {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	var buf bytes.Buffer
 	if err := gob.NewEncoder(&buf).Encode(value); err != nil {
@@ -119,6 +124,7 @@ func (r *redisOperImpl) SetObject(key string, value interface{}) error {
 
 func (r *redisOperImpl) SetObjectOpts(key string, value interface{}, setnx bool, setxx bool, ttl time.Duration) error {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	var buf bytes.Buffer
 	if err := gob.NewEncoder(&buf).Encode(value); err != nil {
@@ -140,6 +146,7 @@ func (r *redisOperImpl) SetObjectOpts(key string, value interface{}, setnx bool,
 
 func (r *redisOperImpl) del(delCmd string, key string) error {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	_, err := conn.Do(delCmd, key)
 	return err
@@ -147,6 +154,7 @@ func (r *redisOperImpl) del(delCmd string, key string) error {
 
 func (r *redisOperImpl) dels(delCmd string, keys ...string) error {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	if _, err := conn.Do("MULTI"); err != nil {
 		return err
@@ -179,6 +187,7 @@ func (r *redisOperImpl) Deletes(keys ...string) error {
 
 func (r *redisOperImpl) DeleteByKeyValue(key string, val string) error {
 	conn := r.redisPool.Get()
+	//nolint:errcheck
 	defer conn.Close()
 	v, err := redis.String(conn.Do("GET", key))
 	if err != nil {

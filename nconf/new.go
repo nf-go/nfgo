@@ -75,6 +75,7 @@ func MustLoadConfigCustom(confPath string, customConfig interface{ SetConfig(con
 	}
 
 	data, err := io.ReadAll(file)
+	//nolint:errcheck
 	file.Close()
 	if err != nil {
 		log.Fatal(err)

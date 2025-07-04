@@ -70,6 +70,7 @@ func (m *redisMutex) TryRunWithMutex(key string, timeout time.Duration, fn func(
 
 	conn := m.redisOper.Conn()
 	_, err = redis.String(conn.Do("SET", key, token, "PX", int64(m.lockTimeout/time.Millisecond), "NX"))
+	//nolint:errcheck
 	conn.Close()
 	if err != nil {
 		if err == redis.ErrNil {

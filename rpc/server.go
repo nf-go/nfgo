@@ -124,6 +124,6 @@ func (s *server) MustServe() {
 }
 
 func (s *server) Shutdown(ctx context.Context) error {
-	s.Server.GracefulStop()
+	s.GracefulStop()
 	return nil
 }

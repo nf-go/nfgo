@@ -57,6 +57,7 @@ func ExampleErrGroup_justErrors() {
 			if err != nil {
 				return errors.New("http get err")
 			}
+			//nolint:errcheck
 			resp.Body.Close()
 			return nil
 		})

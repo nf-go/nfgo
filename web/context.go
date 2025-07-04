@@ -103,6 +103,7 @@ func (c *Context) FormFileBytes(name string) ([]byte, string, error) {
 	if err != nil {
 		return nil, filename, err
 	}
+	//nolint:errcheck
 	defer src.Close()
 	bytes, err := io.ReadAll(src)
 	return bytes, filename, err

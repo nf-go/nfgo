@@ -210,8 +210,8 @@ func SetLevel(level Level) {
 func Sync() error {
 	// ignore "sync /dev/stderr: inappropriate ioctl for device" error
 	//nolint:errcheck // ignore errcheck!
-	logger.SugaredLogger.Sync()
+	logger.Sync()
 	//nolint:errcheck // ignore errcheck!
-	pkgLogger.SugaredLogger.Sync()
+	pkgLogger.Sync()
 	return nil
 }

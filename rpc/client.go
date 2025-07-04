@@ -106,8 +106,7 @@ func dialConn(config *nconf.RPCClientConfig) (*grpc.ClientConn, error) {
 		dialOptions = append(dialOptions, grpc.WithTransportCredentials(creds))
 	}
 
-	// Dial connection
-	return grpc.Dial(config.Addr, dialOptions...)
+	return grpc.NewClient(config.Addr, dialOptions...)
 }
 
 // DialClientConnPlaintext -
